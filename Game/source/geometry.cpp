@@ -1,111 +1,167 @@
 #include "../header/geometry.h"
+#include "../header/util.h"
+
+std::vector< std::vector<char> > map;
+extern std::vector<Block*> walls;
+extern std::vector<b2Vec2> spawnPositions;
+extern std::map<std::string, int> textures;
 
 
-extern std::vector<Line> walls;
-// m_x = m_x/855*18-9;
-// m_y = -m_y/855*18.4+9.2;
 
-//Definicije konstruktora i metoda za klasu Line
-Line::Line(b2Vec2 A, b2Vec2 B)
+
+
+/*            3'
+ *             ######## 2'
+ *           # #    # #
+ *       0'######## 1'#
+ *         #   #  #   #
+ *         # 3 #  #   # 2
+ *         # #    # #
+ *         ########
+ *        0       1
+ *
+ *
+ */
+
+
+
+//Constructor and method definitions for Block class
+Block::Block(b2Vec2 A, double edge)
 {
     m_A = A;
-    m_B = B;
-    len = sqrt(pow(B.x-A.x, 2)+ pow(B.y-A.y, 2));
+    m_edge = edge;
+    m_vertexes[0] = b2Vec2(m_A.x-edge/2,m_A.y-edge/2);
+    m_vertexes[1] = b2Vec2(m_A.x+edge/2,m_A.y-edge/2);
+    m_vertexes[2] = b2Vec2(m_A.x+edge/2,m_A.y+edge/2);
+    m_vertexes[3] = b2Vec2(m_A.x-edge/2,m_A.y+edge/2);
+    b2BodyDef groundBodyDef;
+    groundBodyDef.position.Set(m_A.x, m_A.y);
+    m_body = world->CreateBody(&groundBodyDef);
+    m_body->SetUserData(this);
+
+    b2PolygonShape groundBox;
+    groundBox.SetAsBox(m_edge/2, m_edge/2);
+    m_body->CreateFixture(&groundBox, 0.0f);
 }
+
 
 
 
 void ScaleVec(b2Vec2 * A){
-    A->x = A->x/885*18.4 - 9.2;
-    A->y = -A->y/885*18.4 +9.2;
+    A->x = A->x - 9;
+    A->y = -A->y + 9;
 }
 
-// Vector2D Line::A() const
-// {
-//     return m_A;
-// }
-//
-// void Line::setA(const Vector2D & A)
-// {
-//     m_A = A;
-// }
-//
-// Vector2D Line::B() const
-// {
-//     return m_B;
-// }
-//
-// void Line::setB(const Vector2D & B)
-// {
-//     m_B = B;
-// }
-
+//Loading map from file
 void LoadWalls()
 {
-
     std::string lineFile;
     b2Vec2 A;
-    b2Vec2 B;
-    b2Vec2 C;
-    char c;
     std::ifstream myfile ("walls.txt");
-    if (myfile.is_open()){
+    int n = 0;
+    int i;
+    int j;
+    std::vector<char> line;
+    double edge = 0;
+     if (myfile.is_open()){
         while(getline(myfile,lineFile)){
-            if(lineFile.compare("\n") == 0){
-                return;
+            n = lineFile.length();
+            for(i=0;i<n;i++){
+                line.push_back(lineFile[i]);
             }
-            std::stringstream ss;
-            ss << lineFile;
-            ss >> A.x >> c >> A.y >> c >> B.x >> c >> B.y;
-            ScaleVec(&A);
-            ScaleVec(&B);
-            walls.push_back(Line(A,B));
+            map.push_back(line);
+            line.clear();
+			line.shrink_to_fit();
 
         }
+    }
+    edge = 18.0/n;
+
+
+     for(i=0;i<n;i++){
+            for(j=0;j<n;j++){
+                A.x = j*edge+edge/2;
+                A.y = i*edge+edge/2;
+                ScaleVec(&A);
+                if(map[i][j] == '#'){
+                    walls.push_back(new Block(A, edge));
+                }
+				else if (map[i][j] == 'S') {
+					map[i][j] = ' ';
+					spawnPositions.push_back(A);
+				}
+
+            }
     }
 
     myfile.close();
+}
+
+
+
+void DrawWalls(){
     int n = walls.size();
     int i;
     for(i=0;i<n;i++){
-        C.x = (walls[i].m_A.x+walls[i].m_B.x)/2+0.2;
-        C.y = (walls[i].m_A.y+walls[i].m_B.y)/2;
-        if(walls[i].m_A.x == walls[i].m_B.x){
-            AddWall(C.x, C.y, 0.15, walls[i].len/2);
-        }
-        else{
-            AddWall(C.x, C.y, walls[i].len/2,0.15);
-        }
+        glPushMatrix();
+            glColor3f(1,1,1);
+            glBindTexture(GL_TEXTURE_2D, textures["wall3"]);
+            glBegin(GL_QUADS);
+                //front quad
+                glNormal3f(0, -1, 0);
+                glTexCoord2f(0,0);
+                glVertex3f(walls[i]->m_vertexes[0].x, walls[i]->m_vertexes[0].y, 0);
+                glTexCoord2f(1,0);
+                glVertex3f(walls[i]->m_vertexes[1].x, walls[i]->m_vertexes[1].y, 0);
+                glTexCoord2f(1,1);
+                glVertex3f(walls[i]->m_vertexes[1].x, walls[i]->m_vertexes[1].y, walls[i]->m_edge);
+                glTexCoord2f(0,1);
+                glVertex3f(walls[i]->m_vertexes[0].x, walls[i]->m_vertexes[0].y, walls[i]->m_edge);
+                //right quad
+                glNormal3f(1, 0, 0);
+                glTexCoord2f(0,0);
+                glVertex3f(walls[i]->m_vertexes[1].x, walls[i]->m_vertexes[1].y, 0);
+                glTexCoord2f(1,0);
+                glVertex3f(walls[i]->m_vertexes[2].x, walls[i]->m_vertexes[2].y, 0);
+                glTexCoord2f(1,1);
+                glVertex3f(walls[i]->m_vertexes[2].x, walls[i]->m_vertexes[2].y, walls[i]->m_edge);
+                glTexCoord2f(0,1);
+                glVertex3f(walls[i]->m_vertexes[1].x, walls[i]->m_vertexes[1].y, walls[i]->m_edge);
+                //left quad
+                glNormal3f(-1, 0, 0);
+                glTexCoord2f(0,0);
+                glVertex3f(walls[i]->m_vertexes[3].x, walls[i]->m_vertexes[3].y, 0);
+                glTexCoord2f(1,0);
+                glVertex3f(walls[i]->m_vertexes[0].x, walls[i]->m_vertexes[0].y, 0);
+                glTexCoord2f(1,1);
+                glVertex3f(walls[i]->m_vertexes[0].x, walls[i]->m_vertexes[0].y, walls[i]->m_edge);
+                glTexCoord2f(0,1);
+                glVertex3f(walls[i]->m_vertexes[3].x, walls[i]->m_vertexes[3].y, walls[i]->m_edge);
+                //back quad
+                glNormal3f(0, 1, 0);
+                glTexCoord2f(0,0);
+                glVertex3f(walls[i]->m_vertexes[2].x, walls[i]->m_vertexes[2].y, 0);
+                glTexCoord2f(1,0);
+                glVertex3f(walls[i]->m_vertexes[3].x, walls[i]->m_vertexes[3].y, 0);
+                glTexCoord2f(1,1);
+                glVertex3f(walls[i]->m_vertexes[3].x, walls[i]->m_vertexes[3].y, walls[i]->m_edge);
+                glTexCoord2f(0,1);
+                glVertex3f(walls[i]->m_vertexes[2].x, walls[i]->m_vertexes[2].y, walls[i]->m_edge);
+                //top quad
+                glNormal3f(0, 0, 1);
+                glTexCoord2f(0,0);
+                glVertex3f(walls[i]->m_vertexes[0].x, walls[i]->m_vertexes[0].y, walls[i]->m_edge);
+                glTexCoord2f(1,0);
+                glVertex3f(walls[i]->m_vertexes[1].x, walls[i]->m_vertexes[1].y, walls[i]->m_edge);
+                glTexCoord2f(1,1);
+                glVertex3f(walls[i]->m_vertexes[2].x, walls[i]->m_vertexes[2].y, walls[i]->m_edge);
+                glTexCoord2f(0,1);
+                glVertex3f(walls[i]->m_vertexes[3].x, walls[i]->m_vertexes[3].y, walls[i]->m_edge);
+            glEnd();
+            glBindTexture(GL_TEXTURE_2D, 0);
+        glPopMatrix();
     }
 }
 
-void AddWall(float x, float y, float w, float h){
-    b2BodyDef groundBodyDef;
-    groundBodyDef.position.Set(x, y);
-    b2Body* groundBody = world->CreateBody(&groundBodyDef);
-    b2PolygonShape groundBox;
-    groundBox.SetAsBox(w, h);
-    groundBody->CreateFixture(&groundBox, 0.0f);
-}
 
-// void AddOuterWalls(){
-//     AddWall(0, 10.2, 9, 1);
-//     AddWall(0, -10.2, 9, 1);
-//     AddWall(10, 0, 1, 9);
-//     AddWall(-10, 0, 1, 9);
-// }
-
-
-// int main(int argc, const char *argv[])
-// {
-//
-//     LoadWalls();
-//     int n = walls.size();
-//     int i;
-//     for(i=0;i<n;i++){
-//         std::cout << walls[i].m_A.x << " " << walls[i].m_A.y << "    " << walls[i].m_B.x << " " << walls[i].m_B.y << "         " << walls[i].len<< std::endl;
-//     }
-//
-//
-//     return 0;
-// }
+ClassID Block::getClassID(){return BLOCK;}

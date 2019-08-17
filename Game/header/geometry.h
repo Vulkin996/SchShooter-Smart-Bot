@@ -1,40 +1,37 @@
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
 
+#include "../header/util.h"
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <sstream>
 #include <vector>
 #include <Box2D/Box2D.h>
 #include <cmath>
+#include <GL/glut.h>
 
 
-// Klasa Duz
-struct Line{
-// public:
-    Line(b2Vec2 A, b2Vec2 B);
 
-    // Vector2D A() const;
-    // void setA(const Vector2D & A);
-    //
-    // Vector2D B() const;
-    // void setB(const Vector2D & B);
-
-    double len;
-// private:
+// Block structure
+struct Block : public Colider{
+    Block(b2Vec2 A,double edge);
     b2Vec2 m_A;
-    b2Vec2 m_B;
+    double m_edge;
+    b2Vec2 m_vertexes[4];
+    b2Body* m_body;
+
+    virtual ClassID getClassID();
 };
+
+
 
 
 extern b2World* world;
 
-//Funkcija koja ucitava zidove iz fajla
+//Loading map from file
 void LoadWalls();
 b2Vec2 ScaleVec(const b2Vec2 & A);
-void AddWall(float x, float y, float w, float h);
-
+void DrawWalls();
 
 
 

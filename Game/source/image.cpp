@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include "../header/image.h"
 
+//Coppied and adjusted from Computer Graphics course
+
 Image *image_init(int width, int height) {
 
   Image *image;
@@ -86,10 +88,12 @@ void image_read(Image *image, char *filename) {
    * (da li samo R, G i B komponenta ili R, G, B i A), alociramo niz
    * odgovarajuce duzine.
    */
-  if (bih.bitcount == 24)
+  if (bih.bitcount == 24) {
     image->pixels = (char *)malloc(3 * bih.width * bih.height * sizeof(char));
-  else if (bih.bitcount == 32)
+  }
+  else if (bih.bitcount == 32) {
     image->pixels = (char *)malloc(4 * bih.width * bih.height * sizeof(char));
+  }
   else {
     fprintf(stderr, "image_read(): Podrzane su samo slike koje po pikselu cuvaju 24 ili 32 bita podataka.\n");
     exit(1);
@@ -122,11 +126,19 @@ void image_read(Image *image, char *filename) {
      * da oni (ta 4 bajta) predstavljaju R, G, B i A komponentu boje (1 bajt po
      * komponenti).
      */
+	  //shift fix
+	  for (i = 0; i < 5; i++) {
+		  fread(&b, sizeof(char), 1, file);
+		  fread(&g, sizeof(char), 1, file);
+		  fread(&r, sizeof(char), 1, file);
+		  fread(&a, sizeof(char), 1, file);
+	  }
     for (i = 0; i < bih.width * bih.height; i++) {
       fread(&b, sizeof(char), 1, file);
       fread(&g, sizeof(char), 1, file);
       fread(&r, sizeof(char), 1, file);
       fread(&a, sizeof(char), 1, file);
+	  
 
       image->pixels[4 * i] = r;
       image->pixels[4 * i + 1] = g;

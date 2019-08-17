@@ -1,3 +1,5 @@
+//Coppied and adjusted from Computer Graphics course
+
 /*
  * Dve strukture koje opisuju strukturu dva zaglavlja
  * kojima pocinje svaka slika u bmp formatu.
