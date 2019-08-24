@@ -13,7 +13,7 @@ $(appname): $(objects)
 
 
 clean:
-	rm -f $(objects)
+	rm -f $(objects) $(appname)
 
 dist-clean: clean
 	rm -f *~ .depend
