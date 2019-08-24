@@ -345,19 +345,19 @@ void DrawMap() {
     glPushMatrix();
     glColor3f(0,0,0);
 
-    for(int i = 0; i < 40; ++i){
-        glBegin(GL_LINES);
-        glVertex3f(-9,i*18.0/40-9,0.05);
-        glVertex3f(9,i*18.0/40-9,0.05);
-        glEnd();
-    }
-
-    for(int i = 0; i < 40; ++i){
-        glBegin(GL_LINES);
-        glVertex3f(i*18.0/40-9,9,0.05);
-        glVertex3f(i*18.0/40-9,-9,0.05);
-        glEnd();
-    }
+//     for(int i = 0; i < 40; ++i){
+//         glBegin(GL_LINES);
+//         glVertex3f(-9,i*18.0/40-9,0.05);
+//         glVertex3f(9,i*18.0/40-9,0.05);
+//         glEnd();
+//     }
+// 
+//     for(int i = 0; i < 40; ++i){
+//         glBegin(GL_LINES);
+//         glVertex3f(i*18.0/40-9,9,0.05);
+//         glVertex3f(i*18.0/40-9,-9,0.05);
+//         glEnd();
+//     }
 	glPopMatrix();
 }
 
