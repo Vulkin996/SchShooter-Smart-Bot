@@ -6,6 +6,8 @@
 #include <vector>
 #include <chrono>
 
+void startNetwork(int network);
+
 void InitGame();
 void on_keyboard_game(unsigned char key, int x, int y);
 

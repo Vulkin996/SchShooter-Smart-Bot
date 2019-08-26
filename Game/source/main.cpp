@@ -7,12 +7,26 @@
 #include "../header/bullet.h"
 #include "../header/gameScene.h"
 #include "../header/menuScene.h"
+#include "../header/tmpNetwork.h"
 #include <string>
 #include <vector>
 #include <Box2D/Box2D.h>
 #include <chrono>
 #include <map>
 #include <AL/alut.h>
+
+//vector of temp population representation
+std::vector<tmpNetwork*> networks;
+//pointer to the current unit playing the game
+tmpNetwork* currentNetwork;
+
+//function initializing population
+void setupNetworks(){
+	for(int i = 0; i < 5; i++){
+		networks.push_back(new tmpNetwork(i));
+	}
+	currentNetwork = networks[0];
+}
 
 std::vector<std::string> textureNames = {
 	std::string("sand"),
@@ -34,12 +48,12 @@ std::vector<std::string> textureNames = {
 	std::string("grenade"),
 	std::string("bannerAlive"),
 	std::string("bannerDead"),
-	std::string("spark"),	
+	std::string("spark"),
 	std::string("bullet"),
 	std::string("sniper"),
 	std::string("youDied"),
 	std::string("waveCleared")
-	
+
 
 };
 
@@ -195,18 +209,19 @@ int main(int argc, char **argv)
 	GLfloat lightPos0[] = { -1, 1, 1, 0};
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
 
-    
+
 	glutTimerFunc(TIMER_INTERVAL, on_timer, TIMER_ID);
   	animation_ongoing = 1;
 
-	//Setting current scene and initializing 
-	currentScene = MENU;
+	setupNetworks();
+
+	//Setting current scene and initializing
+	currentScene = GAME;
 	InitGame();
-	InitMenu();
-		
+	//InitMenu();
 	// Entering main glut Loop
 	glutMainLoop();
-	
+
 
 
     return 0;

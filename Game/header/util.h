@@ -80,4 +80,6 @@ bool IsOnScreen(b2Vec2 position);
 float randomNumber(float start, float end);
 float lerp(float start, float end, float t);
 
+float fitness(int kills, double time_alive);
+
 #endif

@@ -12,6 +12,7 @@
 #include "../header/enemySpawner.h"
 #include "../header/particleSystem.h"
 #include "../header/util.h"
+#include "../header/tmpNetwork.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -23,6 +24,11 @@
 
 
 //All necessary elements
+
+extern std::vector<tmpNetwork*> networks;
+
+extern tmpNetwork* currentNetwork;
+
 extern float windowWidth, windowHeight, aspectRatio;
 extern GLuint textureIDs[];
 extern std::map<std::string, int> sounds;
@@ -58,6 +64,10 @@ enum scene {
 };
 extern enum scene currentScene;
 
+void startNetwork(int network){
+	InitGame();
+	glutMainLoop();
+}
 
 //Initializing the game
 void InitGame() {
@@ -313,8 +323,21 @@ void on_timer_game()
 		//In case the human player is dead going back to Main menu
 		if(!myPlayer->alive){
 			alSourceStop(ambientSource[0]);
-			currentScene = MENU;
-			GameOver = true;
+			//currentScene = GAME;
+			//GameOver = true;
+
+			//TODO: get real kills and adequate time representation
+			currentNetwork->_fitness = fitness(0,0);
+
+			if(currentNetwork->_id == networks.size() - 1)
+				currentNetwork = networks[0];
+			else{
+				currentNetwork = networks[currentNetwork->_id + 1];
+			}
+
+			std::cout << "Network: " << currentNetwork->_id << std::endl;
+			Clean(false);
+			InitGame();
 			break;
 		}
 
@@ -351,7 +374,7 @@ void DrawMap() {
 //         glVertex3f(9,i*18.0/40-9,0.05);
 //         glEnd();
 //     }
-// 
+//
 //     for(int i = 0; i < 40; ++i){
 //         glBegin(GL_LINES);
 //         glVertex3f(i*18.0/40-9,9,0.05);
