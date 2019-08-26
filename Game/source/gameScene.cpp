@@ -26,8 +26,9 @@
 //All necessary elements
 
 extern std::vector<tmpNetwork*> networks;
-
 extern tmpNetwork* currentNetwork;
+int timeSurvived = 0;
+int kills = 0;
 
 extern float windowWidth, windowHeight, aspectRatio;
 extern GLuint textureIDs[];
@@ -72,7 +73,8 @@ void startNetwork(int network){
 //Initializing the game
 void InitGame() {
 	updateCount = 0;
-
+	timeSurvived = 0;
+	kills = 0;
 
 	//Setting up background music
 	alGenSources(1, ambientSource);
@@ -260,6 +262,7 @@ void on_timer_game()
 
 	//Do as many updates of the physics as should have happend in normal conditions
 	while (accumulator > phisycsUpdateInterval) {
+		timeSurvived++;
 		updateCount++;
 		world->Step(phisycsUpdateInterval, 6, 2);
 
@@ -327,7 +330,8 @@ void on_timer_game()
 			//GameOver = true;
 
 			//TODO: get real kills and adequate time representation
-			currentNetwork->_fitness = fitness(0,0);
+			currentNetwork->_fitness = fitness(kills, timeSurvived);
+			std::cout << "Network: " << currentNetwork->_id << "finished with fitness: " << currentNetwork->_fitness << std::endl;
 
 			if(currentNetwork->_id == networks.size() - 1)
 				currentNetwork = networks[0];
@@ -335,7 +339,7 @@ void on_timer_game()
 				currentNetwork = networks[currentNetwork->_id + 1];
 			}
 
-			std::cout << "Network: " << currentNetwork->_id << std::endl;
+			std::cout << "Starting Network: " << currentNetwork->_id << std::endl;
 			Clean(false);
 			InitGame();
 			break;

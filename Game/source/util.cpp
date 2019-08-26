@@ -31,7 +31,7 @@ float lerp(float start, float end, float t) {
 	return t * end + (1 - t)*start;
 }
 
-float fitness(int kills, double time_alive){
+float fitness(int kills, int time_alive){
 	const float p_t = 1.0;
 	const float p_k = 1.0;
 	float fitness = time_alive*p_t + kills*p_k;
