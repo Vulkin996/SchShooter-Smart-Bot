@@ -19,6 +19,7 @@ extern float windowWidth, windowHeight;
 extern std::map<std::string, int> sounds;
 
 
+
 //Number of players that we havent reached in the BFS search
 int num;
 
@@ -66,7 +67,7 @@ Player::Player() {
     // Add the shape to the body.
     body->CreateFixture(&fixtureDef);
 
-	
+
 	//Setting up player sounds
     alGenSources(NUM_OF_SOURCES_PLAYER, soundSource);
   	alSourcei(soundSource[0], AL_BUFFER, sounds["death"]);

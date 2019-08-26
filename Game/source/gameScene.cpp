@@ -65,11 +65,6 @@ enum scene {
 };
 extern enum scene currentScene;
 
-void startNetwork(int network){
-	InitGame();
-	glutMainLoop();
-}
-
 //Initializing the game
 void InitGame() {
 	updateCount = 0;
@@ -275,6 +270,9 @@ void on_timer_game()
 				players[i]->deathFlag = false;
 				itemPool->SpawnRandom(players[i]->body->GetPosition());
 				players[i]->die();
+				if(i!=0){
+					kills+=1;
+				}
 			}
 			if (!players[i]->alive) {
 				continue;
@@ -331,7 +329,7 @@ void on_timer_game()
 
 			//TODO: get real kills and adequate time representation
 			currentNetwork->_fitness = fitness(kills, timeSurvived);
-			std::cout << "Network: " << currentNetwork->_id << "finished with fitness: " << currentNetwork->_fitness << std::endl;
+			std::cout << "Network: " << currentNetwork->_id << "finished with fitness: " << currentNetwork->_fitness << " kills: " << kills << " time: " << timeSurvived<<std::endl;
 
 			if(currentNetwork->_id == networks.size() - 1)
 				currentNetwork = networks[0];
@@ -430,12 +428,12 @@ void DrawHUDPlayers() {
 void DrawBullets() {
 	for (unsigned i = 0; i < bullets.size(); i++) {
         if( (abs(bullets[i]->body->GetLinearVelocity().x) <= 0.1 && abs(bullets[i]->body->GetLinearVelocity().y) <= 0.1) || bullets[i]->toDelete == 1){
-			Bullet* tmp = bullets[i];
-			bullets.erase(bullets.begin() + i);
-			delete tmp;
+					Bullet* tmp = bullets[i];
+					bullets.erase(bullets.begin() + i);
+					delete tmp;
 
-            i--;
-            continue;
+          i--;
+          continue;
         }
 		bullets[i]->Draw();
 	}

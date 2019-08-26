@@ -14,6 +14,7 @@ public:
 	int GetEnemiesSpawned() const;
 	int GetCurrentWave() const;
 	void Reset();
+	
 
 private:
 	void Spawn();
