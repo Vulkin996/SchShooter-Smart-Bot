@@ -144,10 +144,10 @@ void InitGame() {
 void on_keyboard_game(unsigned char key, int x, int y)
 {
 	switch (key) {
-	case 27:
-		/* Going back to thes Menu */
-		currentScene = MENU;
-		break;
+	// case 27:
+	// 	/* Going back to thes Menu */
+	// 	currentScene = MENU;
+	// 	break;
 	case 'a':
 		myPlayer->input.horizontal -= 1;
 		break;
