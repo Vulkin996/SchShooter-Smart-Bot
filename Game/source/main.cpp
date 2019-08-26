@@ -7,7 +7,8 @@
 #include "../header/bullet.h"
 #include "../header/gameScene.h"
 #include "../header/menuScene.h"
-#include "../header/tmpNetwork.h"
+#include "../header/annPlayer.h"
+#include <string.h>
 #include <string>
 #include <vector>
 #include <Box2D/Box2D.h>
@@ -16,16 +17,16 @@
 #include <AL/alut.h>
 
 //vector of temp population representation
-std::vector<tmpNetwork*> networks;
+std::vector<ANNPlayer*> networks;
 //pointer to the current unit playing the game
-tmpNetwork* currentNetwork;
+int currentNetwork;
 
 //function initializing population
 void setupNetworks(){
 	for(int i = 0; i < 5; i++){
-		networks.push_back(new tmpNetwork(i));
+		networks.push_back(new ANNPlayer());
 	}
-	currentNetwork = networks[0];
+	currentNetwork = 0;
 }
 
 std::vector<std::string> textureNames = {
@@ -34,8 +35,8 @@ std::vector<std::string> textureNames = {
 	std::string("pistol"),
 	std::string("rifle"),
 	std::string("healthPotion"),
-   	std::string("menu"),
-    std::string("button"),
+ 	std::string("menu"),
+  std::string("button"),
 	std::string("shotgun"),
 	std::string("blood"),
 	std::string("hudbar"),
@@ -86,6 +87,11 @@ std::map<std::string, int> sounds;
 
 GLuint textureIDs[4];
 ALuint soundIDs[18];
+
+bool trainingEnabled = true;
+bool trainingWatchable = true;
+extern bool GameOver;
+int generation = 0;
 
 #define TIMER_ID 0
 #define TIMER_INTERVAL 15
@@ -160,58 +166,86 @@ void LoadTextures(){
 	image_done(image);
 }
 
+void GeneticAlgorithm(){
+	if (GameOver || networks[currentNetwork]->timeAlive > 10000){
+		//BRANKOGEN FITNESS
+		//Kraj partije jedne mreze
+		networks[currentNetwork]->CalculateFitness();
+		std::cout << "Network: " << currentNetwork << "finished with fitness: " << networks[currentNetwork]->m_fitness << " kills: " << networks[currentNetwork]->kills << " time: " << networks[currentNetwork]->timeAlive<<std::endl;
+
+		if(currentNetwork == networks.size() - 1){
+			//BRANKOGEN CROSSOVER
+			//I nova populacija i onda ispocetka sve
+			std::cout << "Generation " << generation << " done" << std::endl;
+			generation++;
+			currentNetwork = 0;
+		}
+		else{
+			currentNetwork++;
+		}
+
+		std::cout << "Starting Network: " << currentNetwork << std::endl;
+		Clean(false);
+		InitGame();
+	}
+}
 
 int main(int argc, char **argv)
 {
+	trainingEnabled = (argc == 2 && strcmp(argv[1], "-t") == 0);
+	trainingWatchable = (argc == 2 && strcmp(argv[1], "-tv") == 0);
 
-    B2_NOT_USED(argc);
-    B2_NOT_USED(argv);
+  B2_NOT_USED(argc);
+  B2_NOT_USED(argv);
 	// Initialising glut
-	glutInit(&argc, argv);
-	alutInit(NULL,NULL);
-	alDistanceModel(AL_LINEAR_DISTANCE);
 
-	glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE | GLUT_MULTISAMPLE);
-	//Creating the window
-	glutInitWindowSize(1280, 720);
-	glutCreateWindow(argv[0]);
+	if (!trainingEnabled){
+		glutInit(&argc, argv);
+		alutInit(NULL,NULL);
+		alDistanceModel(AL_LINEAR_DISTANCE);
 
-	// Registering functions for event detection
-	glutKeyboardFunc(on_keyboard);
-	glutDisplayFunc(on_display);
-	glutMotionFunc(on_mouse_move_active);
-	glutPassiveMotionFunc(on_mouse_move);
-	glutMouseFunc(on_mouse_pressed_released);
-    glutKeyboardUpFunc(keyboard_up);
-	glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
-	glutSetCursor(GLUT_CURSOR_CROSSHAIR);
+		glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE | GLUT_MULTISAMPLE);
+		//Creating the window
+		glutInitWindowSize(1280, 720);
+		glutCreateWindow(argv[0]);
 
-
-    glutReshapeFunc(on_reshape);
-	// Opengl initialization
-	glClearColor(0, 0, 0, 0);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_NORMALIZE);
-	glEnable(GLUT_MULTISAMPLE);
-	glEnable(GL_TEXTURE_2D);
-
-	glShadeModel (GL_SMOOTH);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glEnable(GL_COLOR_MATERIAL);
-
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,
-              GL_MODULATE);
-
-	LoadTextures();
-	LoadSounds();
-
-	GLfloat lightPos0[] = { -1, 1, 1, 0};
-	glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
+		// Registering functions for event detection
+		glutKeyboardFunc(on_keyboard);
+		glutDisplayFunc(on_display);
+		glutMotionFunc(on_mouse_move_active);
+		glutPassiveMotionFunc(on_mouse_move);
+		glutMouseFunc(on_mouse_pressed_released);
+	  glutKeyboardUpFunc(keyboard_up);
+		glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
+		glutSetCursor(GLUT_CURSOR_CROSSHAIR);
 
 
-	glutTimerFunc(TIMER_INTERVAL, on_timer, TIMER_ID);
+	  glutReshapeFunc(on_reshape);
+		// Opengl initialization
+		glClearColor(0, 0, 0, 0);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_NORMALIZE);
+		glEnable(GLUT_MULTISAMPLE);
+		glEnable(GL_TEXTURE_2D);
+
+		glShadeModel (GL_SMOOTH);
+		glEnable(GL_LIGHTING);
+		glEnable(GL_LIGHT0);
+		glEnable(GL_COLOR_MATERIAL);
+
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,
+	              GL_MODULATE);
+
+		LoadTextures();
+		LoadSounds();
+
+		GLfloat lightPos0[] = { -1, 1, 1, 0};
+		glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
+
+
+		glutTimerFunc(TIMER_INTERVAL, on_timer, TIMER_ID);
   	animation_ongoing = 1;
+	}
 
 	setupNetworks();
 
@@ -220,11 +254,20 @@ int main(int argc, char **argv)
 	InitGame();
 	//InitMenu();
 	// Entering main glut Loop
-	glutMainLoop();
 
+	if (trainingEnabled){
+		while(true){
+			//std::cout<<"radi"<<std::endl;
+			//TODO: get real kills and adequate time representation
+			on_timer_game();
+			GeneticAlgorithm();
+		}
+	}
+	else{
+		glutMainLoop();
+	}
 
-
-    return 0;
+  return 0;
 }
 
 
@@ -310,6 +353,13 @@ static void on_timer(int value)
 	switch (currentScene) {
 	case GAME:
 		on_timer_game();
+		if (GameOver){
+			if (trainingWatchable){
+				GeneticAlgorithm();
+			}
+			Clean(false);
+			InitGame();
+		}
 		break;
 	case MENU:
 		on_timer_menu();

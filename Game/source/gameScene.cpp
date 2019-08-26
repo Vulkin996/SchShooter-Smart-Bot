@@ -12,7 +12,7 @@
 #include "../header/enemySpawner.h"
 #include "../header/particleSystem.h"
 #include "../header/util.h"
-#include "../header/tmpNetwork.h"
+#include "../header/annPlayer.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -25,10 +25,8 @@
 
 //All necessary elements
 
-extern std::vector<tmpNetwork*> networks;
-extern tmpNetwork* currentNetwork;
-int timeSurvived = 0;
-int kills = 0;
+extern std::vector<ANNPlayer*> networks;
+extern int currentNetwork;
 
 extern float windowWidth, windowHeight, aspectRatio;
 extern GLuint textureIDs[];
@@ -68,8 +66,7 @@ extern enum scene currentScene;
 //Initializing the game
 void InitGame() {
 	updateCount = 0;
-	timeSurvived = 0;
-	kills = 0;
+	networks[currentNetwork]->ResetFitness();
 
 	//Setting up background music
 	alGenSources(1, ambientSource);
@@ -188,7 +185,6 @@ void on_keyboard_game(unsigned char key, int x, int y)
 	}
 }
 
-
 //When keyboard button is released
 void keyboard_up_game(unsigned char key, int x, int y) {
 	switch (key) {
@@ -246,6 +242,8 @@ void on_mouse_move_game(int x, int y) {
 
 
 
+extern bool trainingEnabled;
+
 void on_timer_game()
 {
 
@@ -255,9 +253,12 @@ void on_timer_game()
 	accumulator += deltaTime.count();
 	lastFrameTime = now;
 
+	if (trainingEnabled){
+		accumulator = phisycsUpdateInterval*1.1;
+	}
 	//Do as many updates of the physics as should have happend in normal conditions
 	while (accumulator > phisycsUpdateInterval) {
-		timeSurvived++;
+		networks[currentNetwork]->timeAlive++;
 		updateCount++;
 		world->Step(phisycsUpdateInterval, 6, 2);
 
@@ -271,7 +272,7 @@ void on_timer_game()
 				itemPool->SpawnRandom(players[i]->body->GetPosition());
 				players[i]->die();
 				if(i!=0){
-					kills+=1;
+					networks[currentNetwork]->kills+=1;
 				}
 			}
 			if (!players[i]->alive) {
@@ -325,21 +326,7 @@ void on_timer_game()
 		if(!myPlayer->alive){
 			alSourceStop(ambientSource[0]);
 			//currentScene = GAME;
-			//GameOver = true;
-
-			//TODO: get real kills and adequate time representation
-			currentNetwork->_fitness = fitness(kills, timeSurvived);
-			std::cout << "Network: " << currentNetwork->_id << "finished with fitness: " << currentNetwork->_fitness << " kills: " << kills << " time: " << timeSurvived<<std::endl;
-
-			if(currentNetwork->_id == networks.size() - 1)
-				currentNetwork = networks[0];
-			else{
-				currentNetwork = networks[currentNetwork->_id + 1];
-			}
-
-			std::cout << "Starting Network: " << currentNetwork->_id << std::endl;
-			Clean(false);
-			InitGame();
+			GameOver = true;
 			break;
 		}
 

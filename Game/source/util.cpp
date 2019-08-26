@@ -30,10 +30,3 @@ float randomNumber(float start, float end) {
 float lerp(float start, float end, float t) {
 	return t * end + (1 - t)*start;
 }
-
-float fitness(int kills, int time_alive){
-	const float p_t = 0.05;
-	const float p_k = 15.0;
-	float fitness = time_alive*p_t + kills*p_k;
-	return fitness;
-}
