@@ -26,7 +26,7 @@ ANNPlayer* currentPlayer = new ANNPlayer();
 const std::string outputFile = "../fann.txt";
 //Genetic algorithm
 GeneticAlgorithm genetic = GeneticAlgorithm(currentPlayer->numberOfConnections);
-unsigned currentNetwork;
+unsigned currentNetwork = 0;
 //function initializing population
 // void setupNetworks(){
 // 	for(int i = 0; i < 1; i++){
@@ -232,7 +232,6 @@ void GeneticAlgorithm(){
 			currentPlayer->SetChromosome(genetic.chromosomes[currentNetwork]->m_content);
 		}
 
-		std::cout << "Starting Network: " << currentNetwork << std::endl;
 		Clean(false);
 		InitGame();
 	}
@@ -306,10 +305,10 @@ int main(int argc, char **argv)
 		windowWidth = 1280;
 		windowHeight = 720;
 		std::cout << "GENERATION: " << genetic.current_iteration << std::endl;
+		currentPlayer->SetChromosome(genetic.chromosomes[0]->m_content);
 		while(true){
 			//std::cout<<"radi"<<std::endl;
 			//TODO: get real kills and adequate time representation
-			currentPlayer->SetChromosome(genetic.chromosomes[0]->m_content);
 			on_timer_game();
 			GeneticAlgorithm();
 		}
