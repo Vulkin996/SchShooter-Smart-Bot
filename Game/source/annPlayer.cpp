@@ -1,9 +1,9 @@
 #include "../header/annPlayer.h"
 
 const unsigned int num_layers = 3;
-const unsigned int num_input = 190;
+const unsigned int num_input = 191;
 const unsigned int num_hidden = 10;
-const unsigned int num_output = 4;
+const unsigned int num_output = 5;
 
 extern const float randomWeigtRange = 10;
 

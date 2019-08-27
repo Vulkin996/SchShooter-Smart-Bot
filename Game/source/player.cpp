@@ -220,9 +220,9 @@ float* playerBrain::generateInput(){
 	w = h * windowWidth / windowHeight;
 	up = h/walls[0]->m_edge;
 	left = w/walls[0]->m_edge;
-	n_input = (2*up) * (2*left+1);
+	n_input = (2*up) * (2*left+1) + 1;
 	float* input = new float[n_input];
-	for(int i = 0; i < n_input; i++){
+	for(int i = 0; i < n_input-1; i++){
 		input[i] = 0;
 	}
 
@@ -230,7 +230,7 @@ float* playerBrain::generateInput(){
 	ip = map.size()-1-(floor((players[0]->body->GetPosition().y + 9.0)/18*map.size()));
     jp = floor((players[0]->body->GetPosition().x + 9.0)/18*map.size());
 
-	for(int k = 0; k < n_input; k++){
+	for(int k = 0; k < n_input-1; k++){
 		int i,j;
 		i = k / (left*2+1)+(ip-up);
 		j = k % (left*2+1)+(jp-left);
@@ -253,6 +253,7 @@ float* playerBrain::generateInput(){
 			input[input_k] = -1;
 		}
 	}
+	input[n_input-1] =  Brain::m_player->equiped_weapon->GetAmmo() / Brain::m_player->equiped_weapon->GetAmmoCap();
 
 	return input;
 }
@@ -305,11 +306,6 @@ void playerBrain::Update(){
 		vx = 1;
 	}
 
-
-
-
-
-
     // float vx = Brain::m_player->input.horizontal;
     // float vy = Brain::m_player->input.vertical;
 
@@ -331,6 +327,11 @@ void playerBrain::Update(){
 	} else{
 		Brain::m_player->input.shoot = false;
 	}
+
+	if(output[4] < 0.5){
+		Brain::m_player->equiped_weapon->reload(Brain::m_player->equiped_weapon->GetAmmoCap());
+	}
+
 	Brain::m_player->moveSoundSource();
 }
 
