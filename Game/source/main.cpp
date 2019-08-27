@@ -22,8 +22,9 @@
 // //pointer to the current unit playing the game
 
 //Current network
-ANNPlayer* currentPlayer = new ANNPlayer();
 const std::string outputFile = "../fann.txt";
+ANNPlayer* currentPlayer = new ANNPlayer(outputFile);
+
 //Genetic algorithm
 GeneticAlgorithm genetic = GeneticAlgorithm(currentPlayer->numberOfConnections);
 unsigned currentNetwork = 0;

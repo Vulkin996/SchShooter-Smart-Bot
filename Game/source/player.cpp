@@ -234,6 +234,9 @@ float* playerBrain::generateInput(){
 		int i,j;
 		i = k / (left*2+1)+(ip-up);
 		j = k % (left*2+1)+(jp-left);
+		if(i>=40 || j >=40 || i < 0 || j < 0){
+			continue;
+		}
 		if(map[i][j]=='#'){
 			input[k] = 1;
 		}
@@ -262,9 +265,9 @@ void playerBrain::Update(){
 	// 	}
 	// 	std::cout<<input[i];
 	// }
-	//
-	//
-	//
+	// //
+	// //
+	// //
 	// std::cout << std::endl;
 	// std::cout << std::endl;
 
