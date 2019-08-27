@@ -1,17 +1,16 @@
-#include "bot.h"
+#include "../header/genetic.h"
 #include "../header/annPlayer.h"
 
 
 // extern const float randomWeigtRange;
-const float ran = 10;
-
+extern const float randomWeigtRange;
 
 GeneticAlgorithm::GeneticAlgorithm(int a_target_size){
   target_size = a_target_size;
-  iterations = 100;
-  generation_size = 300;
+  iterations = 10;
+  generation_size = 50;
   mutation_rate = 0.05;
-  reproduction_size = 100;
+  reproduction_size = 10;
   current_iteration = 0;
   srand(time(0));
 
@@ -27,47 +26,41 @@ GeneticAlgorithm::GeneticAlgorithm(int a_target_size){
 
 
 
-Chromosome* GeneticAlgorithm::optimize(){
-  while(!stop_condition()){
-    std::cout << "Iteration: " << current_iteration << std::endl;
-    for_reproduction = selection(chromosomes);
-
-    std::cout << "Top solution: ";
-    for(int j = 0; j < target_size; j++){
-        std::cout << top_chromosome->m_content[j]<< " ";
-    }
-    std::cout << "Fitness: "<< top_chromosome->m_fitness << std::endl;
-    std::cout << std::endl;
-
-    temp_gen = create_generation(for_reproduction);
-    for_reproduction.clear();
-
-    // for(unsigned i=0; i <generation_size; i++){
-    //     for(int j = 0; j < target_size; j++){
-    //         std::cout << temp_gen[i]->m_content[j] << " ";
-    //     }
-    //     std::cout << "Fitness: "<< temp_gen[i]->m_fitness << std::endl;
-    // }
-
-    for (std::vector<Chromosome*>::iterator ch = chromosomes.begin(); ch != chromosomes.end(); ++ch) {
-        delete[] (*ch)->m_content;
-        delete *ch;
-    }
-
-    chromosomes.clear();
-
-    for(unsigned i = 0; i < generation_size; i++){
-      chromosomes.push_back(temp_gen[i]);
-    }
-    temp_gen.clear();
-
-
-    std::cout << std::endl;
-    current_iteration += 1;
-  }
-
-  return top_chromosome;
-}
+// Chromosome* GeneticAlgorithm::optimize(){
+//   while(!stop_condition()){
+//     std::cout << "Iteration: " << current_iteration << std::endl;
+//     for_reproduction = selection(chromosomes);
+//
+//     std::cout << "Top solution: ";
+//     for(int j = 0; j < target_size; j++){
+//         std::cout << top_chromosome->m_content[j]<< " ";
+//     }
+//     std::cout << "Fitness: "<< top_chromosome->m_fitness << std::endl;
+//     std::cout << std::endl;
+//
+//     temp_gen = create_generation(for_reproduction);
+//     for_reproduction.clear();
+//
+//
+//     for (std::vector<Chromosome*>::iterator ch = chromosomes.begin(); ch != chromosomes.end(); ++ch) {
+//         delete[] (*ch)->m_content;
+//         delete *ch;
+//     }
+//
+//     chromosomes.clear();
+//
+//     for(unsigned i = 0; i < generation_size; i++){
+//       chromosomes.push_back(temp_gen[i]);
+//     }
+//     temp_gen.clear();
+//
+//
+//     std::cout << std::endl;
+//     current_iteration += 1;
+//   }
+//
+//   return top_chromosome;
+// }
 
 
 
@@ -86,8 +79,8 @@ std::vector<Chromosome*> GeneticAlgorithm::create_generation(std::vector<Chromos
     mutation(children.first);
     mutation(children.second);
 
-    new_generation.push_back(new Chromosome(children.first, fitness(children.first)));
-    new_generation.push_back(new Chromosome(children.second, fitness(children.second)));
+    new_generation.push_back(new Chromosome(children.first, 0));
+    new_generation.push_back(new Chromosome(children.second, 0));
   }
 
   return new_generation;
@@ -119,7 +112,7 @@ void GeneticAlgorithm::mutation(float* child){
   float t = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
   if (t < mutation_rate){
     int i = rand() % target_size;
-    float j = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/(2*ran))) - 10;
+    float j = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/(2*randomWeigtRange))) - 10;
     child[i] = j;
   }
 }
@@ -156,18 +149,18 @@ Chromosome* GeneticAlgorithm::selection_roulette_pick_one(std::vector<Chromosome
 
 
 
-float GeneticAlgorithm::fitness(float* weights){
-  float fit = std::accumulate(weights, weights+target_size, 0.0, [](float a, float b){return a + std::fabs(b);});
-  float top = std::accumulate(top_chromosome->m_content, top_chromosome->m_content+target_size, 0.0, [](float a, float b){return a + std::fabs(b);});
-  if(fit > top){
-    for(int i = 0; i < target_size; i++){
-        top_chromosome->m_content[i] = weights[i];
-        top_chromosome->m_fitness = fit;
-    }
-  }
-
-  return fit;
-}
+// float GeneticAlgorithm::fitness(float* weights){
+//   float fit = std::accumulate(weights, weights+target_size, 0.0, [](float a, float b){return a + std::fabs(b);});
+//   float top = std::accumulate(top_chromosome->m_content, top_chromosome->m_content+target_size, 0.0, [](float a, float b){return a + std::fabs(b);});
+//   if(fit > top){
+//     for(int i = 0; i < target_size; i++){
+//         top_chromosome->m_content[i] = weights[i];
+//         top_chromosome->m_fitness = fit;
+//     }
+//   }
+//
+//   return fit;
+// }
 
 
 
@@ -179,11 +172,11 @@ std::vector<Chromosome*> GeneticAlgorithm::inintial_population(){
     for(unsigned i = 0; i < generation_size; ++i){
         float* weights = new float[target_size];
         for(int j = 0; j < target_size; ++j){
-            r = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/(2*ran))) - 10;
+            r = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/(2*randomWeigtRange))) - 10;
             weights[j] = r;
         }
 
-        init_pop.push_back(new Chromosome(weights, fitness(weights)));
+        init_pop.push_back(new Chromosome(weights, 0));
     }
 
     return init_pop;
@@ -200,18 +193,18 @@ Chromosome::Chromosome(float* content, float fitness){
 
 
 
-int main(int argc, const char *argv[]){
-    GeneticAlgorithm genetic = GeneticAlgorithm(15);
-    Chromosome* solution = genetic.optimize();
-
-    std::cout << std::endl;
-    std::cout <<"SOLUTION: "<< std::endl;
-    for(int j = 0; j < genetic.target_size; j++){
-        std::cout << solution->m_content[j]<< " ";
-    }
-    std::cout << std::endl;
-    std::cout << "FITNESS: " << solution->m_fitness << std::endl;
-    std::cout << std::endl;
-
-    return 0;
-}
+// int main(int argc, const char *argv[]){
+//     GeneticAlgorithm genetic = GeneticAlgorithm(15);
+//     Chromosome* solution = genetic.optimize();
+//
+//     std::cout << std::endl;
+//     std::cout <<"SOLUTION: "<< std::endl;
+//     for(int j = 0; j < genetic.target_size; j++){
+//         std::cout << solution->m_content[j]<< " ";
+//     }
+//     std::cout << std::endl;
+//     std::cout << "FITNESS: " << solution->m_fitness << std::endl;
+//     std::cout << std::endl;
+//
+//     return 0;
+// }

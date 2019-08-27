@@ -5,7 +5,7 @@ const unsigned int num_input = 190;
 const unsigned int num_hidden = 10;
 const unsigned int num_output = 4;
 
-const float randomWeigtRange = 10;
+extern const float randomWeigtRange = 10;
 
 ANNPlayer::ANNPlayer(){
   net.create_standard(num_layers, num_input, num_hidden, num_output);

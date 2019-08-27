@@ -21,8 +21,8 @@ extern std::vector<Grenade*> thrownGrenades;
 extern float windowWidth, windowHeight;
 extern std::map<std::string, int> sounds;
 extern std::vector<Block*> walls;
-extern std::vector<ANNPlayer*> networks;
-extern int currentNetwork;
+extern ANNPlayer* currentPlayer;
+
 
 //Number of players that we havent reached in the BFS search
 int num;
@@ -268,7 +268,7 @@ void playerBrain::Update(){
 	// std::cout << std::endl;
 	// std::cout << std::endl;
 
-	float* output = networks[currentNetwork]->GetOutput(input);
+	float* output = currentPlayer->GetOutput(input);
 
 	delete[] input;
 
@@ -385,7 +385,7 @@ void Player::takeDmg(int dmg) {
 
 void Player::takeDmg(int dmg, b2Vec2 bulletVel){
 	if(team){
-		networks[currentNetwork]->dmgDone += dmg;
+		currentPlayer->dmgDone += dmg;
 	}
 	float t = rand();
 	if(t > (RAND_MAX)/2.0)

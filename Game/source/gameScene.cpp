@@ -25,8 +25,8 @@
 
 //All necessary elements
 
-extern std::vector<ANNPlayer*> networks;
-extern int currentNetwork;
+extern ANNPlayer* currentPlayer;
+
 
 extern float windowWidth, windowHeight, aspectRatio;
 extern GLuint textureIDs[];
@@ -66,7 +66,7 @@ extern enum scene currentScene;
 //Initializing the game
 void InitGame() {
 	updateCount = 0;
-	networks[currentNetwork]->ResetFitness();
+	currentPlayer->ResetFitness();
 
 	//Setting up background music
 	alGenSources(1, ambientSource);
@@ -246,7 +246,6 @@ extern bool trainingEnabled;
 
 void on_timer_game()
 {
-
 	//Clock to make sure that game doesnt depend on framerate
 	auto now = std::chrono::high_resolution_clock::now();;
 	std::chrono::duration<double>  deltaTime = now - lastFrameTime;
@@ -258,7 +257,7 @@ void on_timer_game()
 	}
 	//Do as many updates of the physics as should have happend in normal conditions
 	while (accumulator > phisycsUpdateInterval) {
-		networks[currentNetwork]->timeAlive++;
+		currentPlayer->timeAlive++;
 		updateCount++;
 		world->Step(phisycsUpdateInterval, 6, 2);
 
@@ -272,7 +271,7 @@ void on_timer_game()
 				itemPool->SpawnRandom(players[i]->body->GetPosition());
 				players[i]->die();
 				if(i!=0){
-					networks[currentNetwork]->kills+=1;
+					currentPlayer->kills+=1;
 				}
 			}
 

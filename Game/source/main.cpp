@@ -8,6 +8,7 @@
 #include "../header/gameScene.h"
 #include "../header/menuScene.h"
 #include "../header/annPlayer.h"
+#include "../header/genetic.h"
 #include <string.h>
 #include <string>
 #include <vector>
@@ -16,18 +17,23 @@
 #include <map>
 #include <AL/alut.h>
 
-//vector of temp population representation
-std::vector<ANNPlayer*> networks;
-//pointer to the current unit playing the game
-unsigned currentNetwork;
+// //vector of temp population representation
+// std::vector<ANNPlayer*> networks;
+// //pointer to the current unit playing the game
 
+//Current network
+ANNPlayer* currentPlayer = new ANNPlayer();
+const std::string outputFile = "../fann.txt";
+//Genetic algorithm
+GeneticAlgorithm genetic = GeneticAlgorithm(currentPlayer->numberOfConnections);
+unsigned currentNetwork;
 //function initializing population
-void setupNetworks(){
-	for(int i = 0; i < 5; i++){
-		networks.push_back(new ANNPlayer());
-	}
-	currentNetwork = 0;
-}
+// void setupNetworks(){
+// 	for(int i = 0; i < 1; i++){
+// 		networks.push_back(new ANNPlayer());
+// 	}
+// 	currentNetwork = 0;
+// }
 
 std::vector<std::string> textureNames = {
 	std::string("sand"),
@@ -168,21 +174,62 @@ void LoadTextures(){
 }
 
 void GeneticAlgorithm(){
-	if (GameOver || networks[currentNetwork]->timeAlive > 10000){
+	// std::cout << "WAT" <<std::endl;
+	if (GameOver || currentPlayer->timeAlive > 10000){
 		//BRANKOGEN FITNESS
 		//Kraj partije jedne mreze
-		networks[currentNetwork]->CalculateFitness();
-		std::cout << "Network: " << currentNetwork << " finished with fitness: " << networks[currentNetwork]->m_fitness << " kills: " << networks[currentNetwork]->kills << " damage: " << networks[currentNetwork]->dmgDone<<" time: " << networks[currentNetwork]->timeAlive<<std::endl;
-
-		if(currentNetwork == networks.size() - 1){
+		currentPlayer->CalculateFitness();
+		std::cout << "Network: " << currentNetwork << " finished with fitness: " << currentPlayer->m_fitness << " kills: " << currentPlayer->kills << " damage: " << currentPlayer->dmgDone<<" time: " << currentPlayer->timeAlive<<std::endl;
+		if(currentPlayer->m_fitness > genetic.top_chromosome->m_fitness){
+			float* gen = currentPlayer->GetChromosome();
+			for(int i = 0; i < genetic.target_size; i++){
+			    genetic.top_chromosome->m_content[i] = gen[i];
+			    genetic.top_chromosome->m_fitness = currentPlayer->m_fitness;
+			}
+			delete[] gen;
+		}
+		if(currentNetwork == genetic.generation_size-1){
 			//BRANKOGEN CROSSOVER
 			//I nova populacija i onda ispocetka sve
-			std::cout << "Generation " << generation << " done" << std::endl;
-			generation++;
+			genetic.for_reproduction = genetic.selection(genetic.chromosomes);
+			genetic.temp_gen = genetic.create_generation(genetic.for_reproduction);
+			genetic.for_reproduction.clear();
+
+			for (std::vector<Chromosome*>::iterator ch = genetic.chromosomes.begin(); ch != genetic.chromosomes.end(); ++ch) {
+		        delete[] (*ch)->m_content;
+		        delete *ch;
+		    }
+			genetic.chromosomes.clear();
+
+			for(unsigned i = 0; i < genetic.generation_size; i++){
+		      genetic.chromosomes.push_back(genetic.temp_gen[i]);
+		    }
+			genetic.temp_gen.clear();
+
+
 			currentNetwork = 0;
+
+
+
+			genetic.current_iteration++;
+			if(genetic.current_iteration > genetic.iterations){
+				std::cout << "SOLUTION: ";
+				for(int j = 0; j < genetic.target_size; j++){
+					std::cout << genetic.top_chromosome->m_content[j]<< " ";
+				}
+				std::cout << std::endl;
+				std::cout << "FITNESS: "<< genetic.top_chromosome->m_fitness << std::endl;
+				std::cout << std::endl;
+				currentPlayer->SetChromosome(genetic.top_chromosome->m_content);
+				currentPlayer->net.save(outputFile);
+				Clean(true);
+				exit(0);
+			}
+			std::cout << "GENERATION: " << genetic.current_iteration << std::endl;
 		}
 		else{
 			currentNetwork++;
+			currentPlayer->SetChromosome(genetic.chromosomes[currentNetwork]->m_content);
 		}
 
 		std::cout << "Starting Network: " << currentNetwork << std::endl;
@@ -249,7 +296,6 @@ int main(int argc, char **argv)
   	animation_ongoing = 1;
 	}
 
-	setupNetworks();
 	//Setting current scene and initializing
 	currentScene = GAME;
 	InitGame();
@@ -259,9 +305,11 @@ int main(int argc, char **argv)
 	if (trainingEnabled){
 		windowWidth = 1280;
 		windowHeight = 720;
+		std::cout << "GENERATION: " << genetic.current_iteration << std::endl;
 		while(true){
 			//std::cout<<"radi"<<std::endl;
 			//TODO: get real kills and adequate time representation
+			currentPlayer->SetChromosome(genetic.chromosomes[0]->m_content);
 			on_timer_game();
 			GeneticAlgorithm();
 		}
