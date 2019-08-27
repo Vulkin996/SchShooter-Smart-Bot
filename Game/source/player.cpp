@@ -292,7 +292,7 @@ void playerBrain::Update(){
 		vy = 1;
 	}
 
-	if(output[1] < 0.5){
+	if(output[1] < 0.33){
 		vx = -1;
 	}
 	else if(output[1] >= 0.33 && output[1] < 0.66){
