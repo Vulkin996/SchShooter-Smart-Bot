@@ -22,7 +22,8 @@
 // //pointer to the current unit playing the game
 
 //Current network
-const std::string outputFile = "../fann.txt";
+const std::string outputFile = "fann.txt";
+const std::string outputFolderFile = "fanns/fann";
 ANNPlayer* currentPlayer = new ANNPlayer(outputFile);
 
 //Genetic algorithm
@@ -214,13 +215,27 @@ void GeneticAlgorithm(){
 
 			genetic.current_iteration++;
 			if(genetic.current_iteration > genetic.iterations){
-				std::cout << "SOLUTION: ";
+				std::cout << "SOLUTION: " << std::endl;
 				for(int j = 0; j < genetic.target_size; j++){
 					std::cout << genetic.top_chromosome->m_content[j]<< " ";
 				}
 				std::cout << std::endl;
 				std::cout << "FITNESS: "<< genetic.top_chromosome->m_fitness << std::endl;
 				std::cout << std::endl;
+
+
+				for(unsigned i = 0; i < genetic.generation_size; i++){
+					currentPlayer->SetChromosome(genetic.chromosomes[i]->m_content);
+					const std::string file = outputFolderFile + std::to_string(i) + ".txt";
+					currentPlayer->net.save(file);
+				}
+
+				for (std::vector<Chromosome*>::iterator ch = genetic.chromosomes.begin(); ch != genetic.chromosomes.end(); ++ch) {
+					delete[] (*ch)->m_content;
+					delete *ch;
+				}
+				genetic.chromosomes.clear();
+
 				currentPlayer->SetChromosome(genetic.top_chromosome->m_content);
 				currentPlayer->net.save(outputFile);
 				Clean(true);
