@@ -272,14 +272,14 @@ void playerBrain::Update(){
 
 	delete[] input;
 
-	for (int i=0; i<4; i++) {
-        std::cout << output[i] << " ";
-    }
+	// for (int i=0; i<4; i++) {
+    //     std::cout << output[i] << " ";
+    // }
 
 	// std::cout << windowHeight << " " << windowWidth <<std::endl;
 
-	std::cout << std::endl;
-	std::cout << std::endl;
+	// std::cout << std::endl;
+	// std::cout << std::endl;
 
 	float vx,vy;
 	if(output[0] < 0.33){
@@ -384,6 +384,9 @@ void Player::takeDmg(int dmg) {
 }
 
 void Player::takeDmg(int dmg, b2Vec2 bulletVel){
+	if(team){
+		networks[currentNetwork]->dmgDone += dmg;
+	}
 	float t = rand();
 	if(t > (RAND_MAX)/2.0)
 		alSourcePlay(soundSource[1]);

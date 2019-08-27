@@ -10,6 +10,7 @@ public:
 	ANNPlayer(std::string file);
 	int timeAlive;
 	int kills;
+	int dmgDone;
 	int numberOfConnections;
 	void CalculateFitness();
 	void ResetFitness();

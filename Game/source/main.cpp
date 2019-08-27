@@ -19,7 +19,7 @@
 //vector of temp population representation
 std::vector<ANNPlayer*> networks;
 //pointer to the current unit playing the game
-int currentNetwork;
+unsigned currentNetwork;
 
 //function initializing population
 void setupNetworks(){
@@ -172,7 +172,7 @@ void GeneticAlgorithm(){
 		//BRANKOGEN FITNESS
 		//Kraj partije jedne mreze
 		networks[currentNetwork]->CalculateFitness();
-		std::cout << "Network: " << currentNetwork << " finished with fitness: " << networks[currentNetwork]->m_fitness << " kills: " << networks[currentNetwork]->kills << " time: " << networks[currentNetwork]->timeAlive<<std::endl;
+		std::cout << "Network: " << currentNetwork << " finished with fitness: " << networks[currentNetwork]->m_fitness << " kills: " << networks[currentNetwork]->kills << " damage: " << networks[currentNetwork]->dmgDone<<" time: " << networks[currentNetwork]->timeAlive<<std::endl;
 
 		if(currentNetwork == networks.size() - 1){
 			//BRANKOGEN CROSSOVER

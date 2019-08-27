@@ -26,13 +26,15 @@ ANNPlayer::ANNPlayer(std::string file){
 
 void ANNPlayer::CalculateFitness(){
   const float p_t = 0.05;
-  const float p_k = 15.0;
-  m_fitness = timeAlive*p_t + kills*p_k;
+  const float p_k = 50.0;
+  const float p_d = 0.5;
+  m_fitness = timeAlive*p_t + kills*p_k + dmgDone*p_d;
 };
 
 void ANNPlayer::ResetFitness(){
   timeAlive = 0;
   kills = 0;
+  dmgDone = 0;
   m_fitness = -1;
 
   if (tempConnections == NULL){
