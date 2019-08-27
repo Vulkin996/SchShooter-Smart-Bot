@@ -275,14 +275,18 @@ void on_timer_game()
 					networks[currentNetwork]->kills+=1;
 				}
 			}
+
+
 			if (!players[i]->alive) {
 				continue;
 			}
 
 			players[i]->m_brain->Update();
+
 			if(i == 0){
 				alListener3f(AL_POSITION, players[i]->body->GetPosition().x, players[i]->body->GetPosition().y, 0);
 			}
+
 			players[i]->equiped_weapon->Update(players[i]->input.shoot);
 
 		}
@@ -357,19 +361,19 @@ void DrawMap() {
     glPushMatrix();
     glColor3f(0,0,0);
 
-//     for(int i = 0; i < 40; ++i){
-//         glBegin(GL_LINES);
-//         glVertex3f(-9,i*18.0/40-9,0.05);
-//         glVertex3f(9,i*18.0/40-9,0.05);
-//         glEnd();
-//     }
-//
-//     for(int i = 0; i < 40; ++i){
-//         glBegin(GL_LINES);
-//         glVertex3f(i*18.0/40-9,9,0.05);
-//         glVertex3f(i*18.0/40-9,-9,0.05);
-//         glEnd();
-//     }
+    for(int i = 0; i < 40; ++i){
+        glBegin(GL_LINES);
+        glVertex3f(-9,i*18.0/40-9,0.05);
+        glVertex3f(9,i*18.0/40-9,0.05);
+        glEnd();
+    }
+
+    for(int i = 0; i < 40; ++i){
+        glBegin(GL_LINES);
+        glVertex3f(i*18.0/40-9,9,0.05);
+        glVertex3f(i*18.0/40-9,-9,0.05);
+        glEnd();
+    }
 	glPopMatrix();
 }
 

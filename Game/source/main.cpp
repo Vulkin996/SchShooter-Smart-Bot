@@ -92,6 +92,7 @@ bool trainingEnabled = true;
 bool trainingWatchable = true;
 extern bool GameOver;
 int generation = 0;
+float windowWidth, windowHeight, aspectRatio;
 
 #define TIMER_ID 0
 #define TIMER_INTERVAL 15
@@ -171,7 +172,7 @@ void GeneticAlgorithm(){
 		//BRANKOGEN FITNESS
 		//Kraj partije jedne mreze
 		networks[currentNetwork]->CalculateFitness();
-		std::cout << "Network: " << currentNetwork << "finished with fitness: " << networks[currentNetwork]->m_fitness << " kills: " << networks[currentNetwork]->kills << " time: " << networks[currentNetwork]->timeAlive<<std::endl;
+		std::cout << "Network: " << currentNetwork << " finished with fitness: " << networks[currentNetwork]->m_fitness << " kills: " << networks[currentNetwork]->kills << " time: " << networks[currentNetwork]->timeAlive<<std::endl;
 
 		if(currentNetwork == networks.size() - 1){
 			//BRANKOGEN CROSSOVER
@@ -194,6 +195,7 @@ int main(int argc, char **argv)
 {
 	trainingEnabled = (argc == 2 && strcmp(argv[1], "-t") == 0);
 	trainingWatchable = (argc == 2 && strcmp(argv[1], "-tv") == 0);
+
 
   B2_NOT_USED(argc);
   B2_NOT_USED(argv);
@@ -248,7 +250,6 @@ int main(int argc, char **argv)
 	}
 
 	setupNetworks();
-
 	//Setting current scene and initializing
 	currentScene = GAME;
 	InitGame();
@@ -256,6 +257,8 @@ int main(int argc, char **argv)
 	// Entering main glut Loop
 
 	if (trainingEnabled){
+		windowWidth = 1280;
+		windowHeight = 720;
 		while(true){
 			//std::cout<<"radi"<<std::endl;
 			//TODO: get real kills and adequate time representation
@@ -271,7 +274,7 @@ int main(int argc, char **argv)
 }
 
 
-float windowWidth, windowHeight, aspectRatio;
+
 
 static void on_reshape(int width, int height){
 	windowWidth = width;

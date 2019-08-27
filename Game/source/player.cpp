@@ -2,6 +2,9 @@
 #include "../header/weapon.h"
 #include "../header/util.h"
 #include "../header/particleSystem.h"
+#include "../header/geometry.h"
+#include "../header/annPlayer.h"
+#include <iterator>
 #include <GL/glut.h>
 #include <iostream>
 #include <vector>
@@ -17,11 +20,13 @@ extern std::vector<Player*> players;
 extern std::vector<Grenade*> thrownGrenades;
 extern float windowWidth, windowHeight;
 extern std::map<std::string, int> sounds;
-
-
+extern std::vector<Block*> walls;
+extern std::vector<ANNPlayer*> networks;
+extern int currentNetwork;
 
 //Number of players that we havent reached in the BFS search
 int num;
+
 
 
 
@@ -207,21 +212,123 @@ Brain::Brain(Player& player)
 playerBrain::playerBrain(Player& player)
     : Brain(player) {}
 
+float* playerBrain::generateInput(){
+	float h, w;
+	int up, left, n_input, ip, jp;
 
+	h = tan(30 * M_PI / 180) * 4;
+	w = h * windowWidth / windowHeight;
+	up = h/walls[0]->m_edge;
+	left = w/walls[0]->m_edge;
+	n_input = (2*up) * (2*left+1);
+	float* input = new float[n_input];
+	for(int i = 0; i < n_input; i++){
+		input[i] = 0;
+	}
+
+
+	ip = map.size()-1-(floor((players[0]->body->GetPosition().y + 9.0)/18*map.size()));
+    jp = floor((players[0]->body->GetPosition().x + 9.0)/18*map.size());
+
+	for(int k = 0; k < n_input; k++){
+		int i,j;
+		i = k / (left*2+1)+(ip-up);
+		j = k % (left*2+1)+(jp-left);
+		if(map[i][j]=='#'){
+			input[k] = 1;
+		}
+	}
+
+	for(unsigned k=1;k<players.size();++k){
+		if (!players[k]->alive)
+			continue;
+        int i = map.size()-1-(floor((players[k]->body->GetPosition().y + 9.0)/18*map.size()));
+        int j = floor((players[k]->body->GetPosition().x + 9.0)/18*map.size());
+		int input_k;
+		if (!(i > ip + up - 1 || i < ip - up || j > jp + left || j < jp - left)){
+			input_k = (i - (ip-up)) * (2*left+1) + (j - (jp-left));
+			input[input_k] = -1;
+		}
+	}
+
+	return input;
+}
 void playerBrain::Update(){
-    float vx = Brain::m_player->input.horizontal;
-    float vy = Brain::m_player->input.vertical;
+	float* input = generateInput();
+
+	// for(unsigned i = 0; i < 190; i++){
+	// 	if(i%(2*9+1) == 0 && i != 0){
+	// 		std::cout <<std::endl;
+	// 	}
+	// 	std::cout<<input[i];
+	// }
+	//
+	//
+	//
+	// std::cout << std::endl;
+	// std::cout << std::endl;
+
+	float* output = networks[currentNetwork]->GetOutput(input);
+
+	delete[] input;
+
+	for (int i=0; i<4; i++) {
+        std::cout << output[i] << " ";
+    }
+
+	// std::cout << windowHeight << " " << windowWidth <<std::endl;
+
+	std::cout << std::endl;
+	std::cout << std::endl;
+
+	float vx,vy;
+	if(output[0] < 0.33){
+		vy = -1;
+	}
+	else if(output[0] >= 0.33 && output[0] < 0.66){
+		vy = 0;
+	}
+	else{
+		vy = 1;
+	}
+
+	if(output[1] < 0.5){
+		vx = -1;
+	}
+	else if(output[1] >= 0.33 && output[1] < 0.66){
+		vx = 0;
+	}
+	else{
+		vx = 1;
+	}
+
+
+
+
+
+
+    // float vx = Brain::m_player->input.horizontal;
+    // float vy = Brain::m_player->input.vertical;
 
     b2Vec2 vel(vx, vy);
 
     Brain::m_player->body->SetLinearVelocity(vel);
 
-    vx = cos(Brain::m_player->input.angle);
-    vy =  sin(Brain::m_player->input.angle);
-    float n = 0.18;
-    Brain::m_player->equiped_weapon->SetPositionAndAngle(Brain::m_player->body->GetPosition().x + vx*n, Brain::m_player->body->GetPosition().y + vy*n, Brain::m_player->input.angle);
 
-		Brain::m_player->moveSoundSource();
+	float angle = output[2]*(2*M_PI);
+	Brain::m_player->input.angle = angle;
+    vx = cos(angle);
+    vy =  sin(angle);
+    float n = 0.18;
+
+    Brain::m_player->equiped_weapon->SetPositionAndAngle(Brain::m_player->body->GetPosition().x + vx*n, Brain::m_player->body->GetPosition().y + vy*n, angle);
+
+	if(output[3] < 0.5){
+		Brain::m_player->input.shoot = true;
+	} else{
+		Brain::m_player->input.shoot = false;
+	}
+	Brain::m_player->moveSoundSource();
 }
 
 botBrain::botBrain(Player& player)

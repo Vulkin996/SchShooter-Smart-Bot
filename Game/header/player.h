@@ -36,6 +36,7 @@ public:
 	void moveSoundSource();
 	void FreeSources();
 
+
     virtual ClassID getClassID();
     void SetBrain(Brain* brain);
     Brain* m_brain;
@@ -59,7 +60,7 @@ private:
 	int armor;
 	int ammo;
 	int maxArmor;
-	
+
 
 protected:
 
@@ -80,7 +81,7 @@ public:
 class playerBrain: public Brain{
 public:
     playerBrain(Player& player);
-
+    float* generateInput();
 public:
     void Update();
 };
