@@ -32,7 +32,7 @@ void ANNPlayer::CalculateFitness(){
 };
 
 void ANNPlayer::ResetFitness(){
-  //timeAlive = 0;
+  timeAlive = 0;
   kills = 0;
   dmgDone = 0;
   m_fitness = -1;

@@ -8,7 +8,7 @@ class ANNPlayer{
 public:
 	ANNPlayer();
 	ANNPlayer(std::string file);
-	//int timeAlive;
+	int timeAlive;
 	int kills;
 	int dmgDone;
 	int numberOfConnections;

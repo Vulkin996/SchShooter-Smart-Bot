@@ -260,7 +260,7 @@ void on_timer_game()
 	}
 	//Do as many updates of the physics as should have happend in normal conditions
 	while (accumulator > phisycsUpdateInterval) {
-		//currentPlayer->timeAlive++;
+		currentPlayer->timeAlive++;
 		updateCount++;
 		world->Step(phisycsUpdateInterval, 6, 2);
 
