@@ -28,6 +28,7 @@ public:
   float fitness(float* content);
   bool stop_condition();
 
+	void setIterations(int iter);
 
   std::vector<Chromosome*> temp_gen;
   std::vector<Chromosome*> for_reproduction;

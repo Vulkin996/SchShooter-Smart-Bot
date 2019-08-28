@@ -24,7 +24,9 @@ GeneticAlgorithm::GeneticAlgorithm(int a_target_size){
 
 }
 
-
+void GeneticAlgorithm::setIterations(int iter){
+	iterations = iter;
+}
 
 // Chromosome* GeneticAlgorithm::optimize(){
 //   while(!stop_condition()){

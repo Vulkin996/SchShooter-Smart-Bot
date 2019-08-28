@@ -108,17 +108,15 @@ float windowWidth, windowHeight, aspectRatio;
 enum scene {
 	GAME,
 	MENU
-	//EASTER_EGG
 };
 enum scene currentScene;
 
 
 static int animation_ongoing;
+/*
 static void on_keyboard(unsigned char key, int x, int y);
 static void keyboard_up(unsigned char key, int x, int y);
-static void on_mouse_move(int x, int y);
-static void on_mouse_move_active(int x, int y);
-static void on_mouse_pressed_released(int button, int state, int x, int y);
+*/
 static void on_timer(int value);
 static void on_display(void);
 static void on_reshape(int width, int height);
@@ -129,7 +127,6 @@ void LoadSounds(){
 		buffer = alutCreateBufferFromFile(("sound/"+soundNames[i]+".wav").c_str());
 
 		if ( alutGetError() != ALUT_ERROR_NO_ERROR ){
-   		// TODO: handle the error
 			std::cerr<<"Failed to Load Sounds!" <<std::endl;
    		return;
 		}
@@ -176,7 +173,6 @@ void LoadTextures(){
 }
 
 void GeneticAlgorithm(){
-	// std::cout << "WAT" <<std::endl;
 	if (GameOver || currentPlayer->timeAlive > 10000){
 		//BRANKOGEN FITNESS
 		//Kraj partije jedne mreze
@@ -255,7 +251,7 @@ void GeneticAlgorithm(){
 
 int main(int argc, char **argv)
 {
-	trainingEnabled = (argc == 2 && strcmp(argv[1], "-t") == 0);
+	trainingEnabled = ((argc == 2 || argc == 3) && strcmp(argv[1], "-t") == 0);
 	trainingWatchable = (argc == 2 && strcmp(argv[1], "-tv") == 0);
 
 
@@ -274,12 +270,9 @@ int main(int argc, char **argv)
 		glutCreateWindow(argv[0]);
 
 		// Registering functions for event detection
-		glutKeyboardFunc(on_keyboard);
+		//glutKeyboardFunc(on_keyboard);
 		glutDisplayFunc(on_display);
-		glutMotionFunc(on_mouse_move_active);
-		glutPassiveMotionFunc(on_mouse_move);
-		glutMouseFunc(on_mouse_pressed_released);
-	  glutKeyboardUpFunc(keyboard_up);
+	  //glutKeyboardUpFunc(keyboard_up);
 		glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
 		glutSetCursor(GLUT_CURSOR_CROSSHAIR);
 
@@ -314,17 +307,15 @@ int main(int argc, char **argv)
 	//Setting current scene and initializing
 	currentScene = GAME;
 	InitGame();
-	//InitMenu();
-	// Entering main glut Loop
 
 	if (trainingEnabled){
+		int iter = argc == 3 ? atoi(argv[2]) : 10;
+		genetic.setIterations(iter);
 		windowWidth = 1280;
 		windowHeight = 720;
 		std::cout << "GENERATION: " << genetic.current_iteration << std::endl;
 		currentPlayer->SetChromosome(genetic.chromosomes[0]->m_content);
 		while(true){
-			//std::cout<<"radi"<<std::endl;
-			//TODO: get real kills and adequate time representation
 			on_timer_game();
 			GeneticAlgorithm();
 		}
@@ -336,9 +327,6 @@ int main(int argc, char **argv)
   return 0;
 }
 
-
-
-
 static void on_reshape(int width, int height){
 	windowWidth = width;
 	windowHeight = height;
@@ -349,7 +337,7 @@ static void on_reshape(int width, int height){
 	glLoadIdentity();
 	gluPerspective(60,  (float)width/height, 0.01 ,  1000);
 }
-
+/*
 static void on_keyboard(unsigned char key, int x, int y)
 {
 	switch (currentScene) {
@@ -372,41 +360,7 @@ static void keyboard_up(unsigned char key, int x, int y){
 		break;
 	}
 }
-
-
-static void on_mouse_pressed_released(int button, int state, int x, int y) {
-	switch (currentScene) {
-	case GAME:
-		on_mouse_pressed_released_game(button, state, x, y);
-		break;
-    case MENU:
-        on_mouse_pressed_released_menu(button, state, x, y);
-        break;
-    }
-
-}
-
-static void on_mouse_move_active(int x, int y) {
-	switch (currentScene) {
-	case GAME:
-		on_mouse_move_active_game(x, y);
-		break;
-	case MENU:
-		break;
-	}
-}
-
-
-static void on_mouse_move(int x, int y){
-	switch (currentScene) {
-	case GAME:
-		on_mouse_move_game(x, y);
-		break;
-	case MENU:
-		break;
-	}
-}
-
+*/
 
 
 static void on_timer(int value)

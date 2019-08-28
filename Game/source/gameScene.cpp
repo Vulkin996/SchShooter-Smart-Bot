@@ -98,6 +98,7 @@ void InitGame() {
 	myPlayer->SetMaxHealth(200);
 	myPlayer->SetMaxArmor(200);
 	myPlayer->SetAmmo(100);
+	myPlayer->SwapWeapon(new Rifle(0,0,0));
 	myPlayer->body->SetTransform(b2Vec2(0, 0), 1);
 	myPlayer->Revive();
 	players.push_back(myPlayer);
@@ -120,10 +121,10 @@ void InitGame() {
 	//b2Vec2 pos, b2Vec2 force, int particleCount, float lifespan, std::string texture)
 	//players[1]->input.shoot = true;
 
-	//Test for the items
-	itemPool->Add(new Rifle(-2, 0, 0));
-	itemPool->Add(new Armor(-3, 0));
-	itemPool->Add(new GrenadeItem(-4, 0));
+	//Test for the items REMOVED BOT DOES NOT PICKUP
+	//itemPool->Add(new Rifle(-2, 0, 0));
+	//itemPool->Add(new Armor(-3, 0));
+	//itemPool->Add(new GrenadeItem(-4, 0));
 
 
 	//Starting background music
@@ -135,11 +136,9 @@ void InitGame() {
 //When keyboard button is pressed
 void on_keyboard_game(unsigned char key, int x, int y)
 {
-	switch (key) {
-	// case 27:
-	// 	/* Going back to thes Menu */
-	// 	currentScene = MENU;
-	// 	break;
+	//removed player controlls
+	/*switch (key) {
+
 	case 'a':
 		myPlayer->input.horizontal -= 1;
 		break;
@@ -182,11 +181,13 @@ void on_keyboard_game(unsigned char key, int x, int y)
 			break;
 		}
 
-	}
+	}*/
 }
 
 //When keyboard button is released
 void keyboard_up_game(unsigned char key, int x, int y) {
+	//removed player controlls
+	/*
 	switch (key) {
 	case 'a':
 		myPlayer->input.horizontal += 1;
@@ -208,7 +209,7 @@ void keyboard_up_game(unsigned char key, int x, int y) {
 		}
 		break;
 		}
-	}
+	}*/
 }
 
 //Mouse click and release handler
@@ -231,13 +232,15 @@ void on_mouse_move_active_game(int x, int y) {
 
 //Following mouse position at all times to adjust the aim
 void on_mouse_move_game(int x, int y) {
+	//removed mouse controlls
+	/*
 	float dx = x - windowWidth / 2;
 	float dy = y - windowHeight / 2;
 
 	myPlayer->input.cursorDist = sqrt(dx*dx + dy*dy)/windowWidth;
 
 	float angle = atan2(dy, dx);
-	myPlayer->input.angle = -angle;
+	myPlayer->input.angle = -angle;*/
 }
 
 
@@ -257,7 +260,7 @@ void on_timer_game()
 	}
 	//Do as many updates of the physics as should have happend in normal conditions
 	while (accumulator > phisycsUpdateInterval) {
-		currentPlayer->timeAlive++;
+		//currentPlayer->timeAlive++;
 		updateCount++;
 		world->Step(phisycsUpdateInterval, 6, 2);
 
@@ -268,7 +271,8 @@ void on_timer_game()
 		for (unsigned i = 0; i < players.size(); i++) {
 			if (players[i]->deathFlag) {
 				players[i]->deathFlag = false;
-				itemPool->SpawnRandom(players[i]->body->GetPosition());
+				//disabled item spawn BOT does not pick up
+				//itemPool->SpawnRandom(players[i]->body->GetPosition());
 				players[i]->die();
 				if(i!=0){
 					currentPlayer->kills+=1;
