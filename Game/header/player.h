@@ -22,7 +22,7 @@ public:
     void DrawShadow();
 	void SwapWeapon(Weapon* newWeapon);
 	void takeDmg(int dmg);
-	void takeDmg(int dmg, b2Vec2 dir);
+	void takeDmg(int dmg, b2Vec2 bulletVel, int m_team);
 	void IncreaseHealth(int amount);
 	void IncreaseGrenades(int amount);
 	void throwGrenade();

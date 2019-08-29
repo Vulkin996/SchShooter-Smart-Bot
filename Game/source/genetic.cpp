@@ -1,12 +1,12 @@
 #include "../header/genetic.h"
 #include "../header/annPlayer.h"
+#include <limits.h>
 
 
 // extern const float randomWeigtRange;
 extern const float randomWeigtRange;
 
-GeneticAlgorithm::GeneticAlgorithm(int a_target_size){
-  target_size = a_target_size;
+GeneticAlgorithm::GeneticAlgorithm(){
   iterations = 10;
   generation_size = 50;
   mutation_rate = 0.05;
@@ -14,6 +14,10 @@ GeneticAlgorithm::GeneticAlgorithm(int a_target_size){
   current_iteration = 0;
   srand(time(0));
 
+}
+
+void GeneticAlgorithm::Init(int a_target_size){
+  target_size = a_target_size;
   float* v = new float[target_size];
   for(int i = 0; i < target_size; i++){
       v[i] = 0;
@@ -21,7 +25,6 @@ GeneticAlgorithm::GeneticAlgorithm(int a_target_size){
   top_chromosome = new Chromosome(v, 0);
 
   chromosomes = inintial_population();
-
 }
 
 void GeneticAlgorithm::setIterations(int iter){
@@ -92,18 +95,18 @@ std::vector<Chromosome*> GeneticAlgorithm::create_generation(std::vector<Chromos
 
 
 std::pair<float*, float*> GeneticAlgorithm::crossover(float* parent1, float* parent2){
-  int cross_point = rand() % target_size;
   float* child1 = new float[target_size];
   float* child2 = new float[target_size];
   for(int i = 0; i < target_size; ++i){
-      if(i < cross_point){
-          child1[i] = parent1[i];
-          child2[i] = parent2[i];
-      }
-      else{
-          child1[i] = parent2[i];
-          child2[i] = parent1[i];
-      }
+    float shouldCross = ((float)rand()) / INT_MAX;
+    if(shouldCross < 0.5){
+        child1[i] = parent1[i];
+        child2[i] = parent2[i];
+    }
+    else{
+        child1[i] = parent2[i];
+        child2[i] = parent1[i];
+    }
   }
   return std::make_pair(child1, child2);
 }
@@ -111,11 +114,12 @@ std::pair<float*, float*> GeneticAlgorithm::crossover(float* parent1, float* par
 
 
 void GeneticAlgorithm::mutation(float* child){
-  float t = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
-  if (t < mutation_rate){
-    int i = rand() % target_size;
-    float j = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/(2*randomWeigtRange))) - 10;
-    child[i] = j;
+  for (int i=0; i<target_size; i++){
+    float t = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
+    if (t < mutation_rate){
+      float j = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/(2*randomWeigtRange))) - 10;
+      child[i] = j;
+    }
   }
 }
 
@@ -191,6 +195,14 @@ bool GeneticAlgorithm::stop_condition(){
 Chromosome::Chromosome(float* content, float fitness){
   m_content = content;
   m_fitness = fitness;
+}
+
+Chromosome::Chromosome(Chromosome* ch, int size){
+  m_content = new float[size];
+  for(int i = 0; i < size; i++){
+      m_content[i] = ch->m_content[i];
+  }
+  m_fitness = ch->m_fitness;
 }
 
 

@@ -11,14 +11,16 @@
 class Chromosome{
 public:
   Chromosome(float* content, float fitness);
+  Chromosome(Chromosome* ch, int size);
   float* m_content;
   float m_fitness;
 };
 
 class GeneticAlgorithm {
 public:
-  GeneticAlgorithm(int a_target_size);
+  GeneticAlgorithm();
   Chromosome* optimize();
+  void Init(int a_target_size);
   void mutation(float* child);
   std::vector<Chromosome*> inintial_population();
   std::vector<Chromosome*> selection(std::vector<Chromosome*>& chromosomes);

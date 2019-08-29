@@ -9,10 +9,11 @@ extern b2World* world;
 extern std::map<std::string, int> textures;
 
 /*Bullet constructor: takes a point from which a bullet is being fired and a trajectory angle*/
-Bullet::Bullet(float x, float y, float angle, int dmg, float bulletSize, float speed){
+Bullet::Bullet(float x, float y, float angle, int dmg, float bulletSize, float speed, int team){
 	r = bulletSize;
 	m_dmg = dmg;
 	toDelete = 0;
+	m_team = team;
 
 	/*Creating Bullet Body*/
 	b2BodyDef bodyDef;

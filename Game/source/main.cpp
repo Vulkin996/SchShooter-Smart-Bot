@@ -24,10 +24,11 @@
 //Current network
 const std::string outputFile = "fann.txt";
 const std::string outputFolderFile = "fanns/fann";
-ANNPlayer* currentPlayer = new ANNPlayer(outputFile);
+ANNPlayer* currentPlayer;
 
 //Genetic algorithm
-GeneticAlgorithm genetic = GeneticAlgorithm(currentPlayer->numberOfConnections);
+GeneticAlgorithm genetic;
+
 unsigned currentNetwork = 0;
 //function initializing population
 // void setupNetworks(){
@@ -172,8 +173,8 @@ void LoadTextures(){
 	image_done(image);
 }
 
-void GeneticAlgorithm(){
-	if (GameOver || currentPlayer->timeAlive > 10000){
+void HandleSimulationStep(){
+	if (GameOver || currentPlayer->timeAlive > 5000){
 		//BRANKOGEN FITNESS
 		//Kraj partije jedne mreze
 		currentPlayer->CalculateFitness();
@@ -199,11 +200,19 @@ void GeneticAlgorithm(){
 		    }
 			genetic.chromosomes.clear();
 
-			for(unsigned i = 0; i < genetic.generation_size; i++){
-		      genetic.chromosomes.push_back(genetic.temp_gen[i]);
-		    }
+			for(unsigned i = 0; i < genetic.generation_size-1; i++){
+	      genetic.chromosomes.push_back(genetic.temp_gen[i]);
+	    }
+			genetic.chromosomes.push_back(new Chromosome(genetic.top_chromosome, genetic.target_size));
 			genetic.temp_gen.clear();
 
+			std::cout << "SOLUTION: " << std::endl;
+			for(int j = 0; j < genetic.target_size; j++){
+				std::cout << genetic.top_chromosome->m_content[j]<< " ";
+			}
+			std::cout << std::endl << "Save FITNESS: "<< genetic.top_chromosome->m_fitness << std::endl;
+			currentPlayer->SetChromosome(genetic.top_chromosome->m_content);
+			currentPlayer->net.save(outputFile);
 
 			currentNetwork = 0;
 
@@ -218,6 +227,8 @@ void GeneticAlgorithm(){
 				std::cout << std::endl;
 				std::cout << "FITNESS: "<< genetic.top_chromosome->m_fitness << std::endl;
 				std::cout << std::endl;
+				currentPlayer->SetChromosome(genetic.top_chromosome->m_content);
+				currentPlayer->net.save(outputFile);
 
 
 				for(unsigned i = 0; i < genetic.generation_size; i++){
@@ -232,8 +243,6 @@ void GeneticAlgorithm(){
 				}
 				genetic.chromosomes.clear();
 
-				currentPlayer->SetChromosome(genetic.top_chromosome->m_content);
-				currentPlayer->net.save(outputFile);
 				Clean(true);
 				exit(0);
 			}
@@ -305,22 +314,30 @@ int main(int argc, char **argv)
 	}
 
 	//Setting current scene and initializing
+	currentPlayer = new ANNPlayer(outputFile);
 	currentScene = GAME;
 	InitGame();
 
 	if (trainingEnabled){
 		int iter = argc == 3 ? atoi(argv[2]) : 10;
+		genetic.Init(currentPlayer->numberOfConnections);
 		genetic.setIterations(iter);
 		windowWidth = 1280;
 		windowHeight = 720;
+		std::cout << "Connections: " << currentPlayer->numberOfConnections << std::endl;
 		std::cout << "GENERATION: " << genetic.current_iteration << std::endl;
-		currentPlayer->SetChromosome(genetic.chromosomes[0]->m_content);
+		//currentPlayer->SetChromosome(genetic.chromosomes[0]->m_content);
 		while(true){
 			on_timer_game();
-			GeneticAlgorithm();
+			HandleSimulationStep();
 		}
 	}
 	else{
+		if (trainingWatchable){
+			int iter = argc == 3 ? atoi(argv[2]) : 10;
+			genetic.Init(currentPlayer->numberOfConnections);
+			genetic.setIterations(iter);
+		}
 		glutMainLoop();
 	}
 
@@ -375,7 +392,7 @@ static void on_timer(int value)
 		on_timer_game();
 		if (GameOver){
 			if (trainingWatchable){
-				GeneticAlgorithm();
+				HandleSimulationStep();
 			}
 			Clean(false);
 			InitGame();

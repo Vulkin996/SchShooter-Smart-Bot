@@ -43,6 +43,7 @@ Player::Player() {
 	input.shoot = false;
 	input.angle= M_PI/2;
 	secondaryGun = new Pistol(0.0f, 0.0f, input.angle);
+	secondaryGun->SetHolder(this);
 	equiped_weapon = secondaryGun;
 	deathFlag = false;
 	alive = false;
@@ -213,6 +214,24 @@ playerBrain::playerBrain(Player& player)
     : Brain(player) {}
 
 float* playerBrain::generateInput(){
+
+	float* input = new float[2];
+	int indexClosest = 1;
+	float minDistance = 100000;
+	for (unsigned i=1; i<players.size(); i++){
+		if (players[i]->alive){
+			float distance = (players[0]->body->GetPosition() - players[i]->body->GetPosition()).Length();
+			if (distance < minDistance){
+				indexClosest = i;
+				minDistance = distance;
+			}
+		}
+	}
+	b2Vec2 dir = players[indexClosest]->body->GetPosition() - players[0]->body->GetPosition();
+	input[0] = atan2((float)dir.y, (float)dir.x);
+	input[1] = (float)Brain::m_player->equiped_weapon->GetAmmo() / Brain::m_player->equiped_weapon->GetAmmoCap();
+	return input;
+	/*
 	float h, w;
 	int up, left, n_input, ip, jp;
 
@@ -238,7 +257,7 @@ float* playerBrain::generateInput(){
 			continue;
 		}
 		if(map[i][j]=='#'){
-			input[k] = 1;
+			input[k] = 0;
 		}
 	}
 
@@ -250,12 +269,13 @@ float* playerBrain::generateInput(){
 		int input_k;
 		if (!(i > ip + up - 1 || i < ip - up || j > jp + left || j < jp - left)){
 			input_k = (i - (ip-up)) * (2*left+1) + (j - (jp-left));
-			input[input_k] = -1;
+			input[input_k] = 1;
 		}
 	}
-	input[n_input-1] =  Brain::m_player->equiped_weapon->GetAmmo() / Brain::m_player->equiped_weapon->GetAmmoCap();
+	input[n_input-1] =  (float)Brain::m_player->equiped_weapon->GetAmmo() / Brain::m_player->equiped_weapon->GetAmmoCap();
 
 	return input;
+	*/
 }
 void playerBrain::Update(){
 	float* input = generateInput();
@@ -271,7 +291,6 @@ void playerBrain::Update(){
 	// //
 	// std::cout << std::endl;
 	// std::cout << std::endl;
-
 	float* output = currentPlayer->GetOutput(input);
 
 	delete[] input;
@@ -315,11 +334,11 @@ void playerBrain::Update(){
 
 
 	float angle = output[2]*(2*M_PI);
+	//printf("Angle %f %f\n", output[2], angle);
 	Brain::m_player->input.angle = angle;
     vx = cos(angle);
-    vy =  sin(angle);
+    vy = sin(angle);
     float n = 0.18;
-
     Brain::m_player->equiped_weapon->SetPositionAndAngle(Brain::m_player->body->GetPosition().x + vx*n, Brain::m_player->body->GetPosition().y + vy*n, angle);
 
 	if(output[3] < 0.5){
@@ -349,6 +368,7 @@ void botBrain::Update(){
     vx = cos(Brain::m_player->input.angle);
     vy =  sin(Brain::m_player->input.angle);
     float n = 0.18;
+
     Brain::m_player->equiped_weapon->SetPositionAndAngle(Brain::m_player->body->GetPosition().x + vx*n, Brain::m_player->body->GetPosition().y + vy*n, Brain::m_player->input.angle);
 
 		Brain::m_player->moveSoundSource();
@@ -384,10 +404,13 @@ void StartBloodEffet(b2Vec2 pos, b2Vec2 bulletVel) {
 
 
 void Player::takeDmg(int dmg) {
-	takeDmg(dmg, b2Vec2(0, 0));
+	takeDmg(dmg, b2Vec2(0, 0), -1);
 }
 
-void Player::takeDmg(int dmg, b2Vec2 bulletVel){
+void Player::takeDmg(int dmg, b2Vec2 bulletVel, int m_team){
+	if (m_team == team){
+		return;
+	}
 	if(team){
 		currentPlayer->dmgDone += dmg;
 	}
@@ -445,6 +468,7 @@ void Player::SwapWeapon(Weapon* newWeapon) {
 		old->FreeSources();
 	}
 	equiped_weapon = newWeapon;
+	newWeapon->SetHolder(this);
 	delete(old);
 }
 //Making sure sound is centered on the player

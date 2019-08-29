@@ -35,6 +35,7 @@ Weapon::Weapon(float x, float y, float angle, float pickupDistance, std::string 
 	pos_y = y;
 	angle = angle;
 	recoilAmount = 0;
+	m_holder = NULL;
 
 	alGenSources(NUM_OF_SOURCES_WEAP, soundSource);
 	alSourcei(soundSource[0], AL_BUFFER, sounds[icon]);
@@ -89,7 +90,8 @@ void Weapon::fire(){
 	if(fire_timer <= 0 && reload_timer <= 0 && this->ammo != 0){
 		//Calculating new angle from random spread
 		float firing_angle = angle + spread*randomNumber(-1,1)*recoilAmount;
-		Bullet* firedBullet = new Bullet(pos_x, pos_y, firing_angle, dmg, bulletSIze, speed);
+
+		Bullet* firedBullet = new Bullet(pos_x, pos_y, firing_angle, dmg, bulletSIze, speed, m_holder->team);
 		//Adding bullet to the list of fired bullets
 		bullets.push_back(firedBullet);
 
@@ -106,7 +108,9 @@ void Weapon::fire(){
 			recoilAmount = RE_AMM_MAX;
 	}
 }
-
+void Weapon::SetHolder(Player* holder){
+	m_holder = holder;
+}
 //Handling weapon reload
 int Weapon::reload(int mag){
 	int left = mag;
@@ -198,7 +202,7 @@ void Shotgun::fire() {
 		{
 			float rand = randomNumber(-1, 1);
 			float firing_angle = angle + spread * rand * (i+1)/ (float)palletNumber;
-			Bullet* firedBullet = new Bullet(pos_x, pos_y, firing_angle, dmg, bulletSIze, speed);
+			Bullet* firedBullet = new Bullet(pos_x, pos_y, firing_angle, dmg, bulletSIze, speed, m_holder->team);
 			//Adding bullet to the list of fired bullets
 			bullets.push_back(firedBullet);
 		}
@@ -325,7 +329,7 @@ void Grenade::explode(){
 			//if we didnt find a wall finaly apply the damage
 	    if(doDmg){
 				dist = (dist == 0 ? 1 : dist);
-				players[i]->takeDmg(dmg/(dist*1.3), players[i]->body->GetPosition()-body->GetPosition());
+				players[i]->takeDmg(dmg/(dist*1.3), players[i]->body->GetPosition()-body->GetPosition(), -1);
 			}
 		}
 	}

@@ -8,6 +8,7 @@ class ANNPlayer{
 public:
 	ANNPlayer();
 	ANNPlayer(std::string file);
+	void MakeBaseNet();
 	int timeAlive;
 	int kills;
 	int dmgDone;

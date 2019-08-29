@@ -1,28 +1,36 @@
 #include "../header/annPlayer.h"
 
 const unsigned int num_layers = 3;
-const unsigned int num_input = 191;
-const unsigned int num_hidden = 10;
+const unsigned int num_input = 2;
+const unsigned int num_hidden = 3;
 const unsigned int num_output = 5;
 
 extern const float randomWeigtRange = 10;
 
 ANNPlayer::ANNPlayer(){
-  net.create_standard(num_layers, num_input, num_hidden, num_output);
-  net.randomize_weights(-randomWeigtRange, randomWeigtRange);
-  numberOfConnections = net.get_total_connections();
-  ResetFitness();
+  MakeBaseNet();
 };
 
 ANNPlayer::ANNPlayer(std::string file){
   if (!net.create_from_file(file)){
-    ANNPlayer();
+    MakeBaseNet();
+    printf("Napravio basic mrezu\n");
   }
   else{
     numberOfConnections = net.get_total_connections();
     ResetFitness();
+    printf("Ucitao mrezu\n");
   }
 };
+
+void ANNPlayer::MakeBaseNet(){
+  net.create_standard(num_layers, num_input, num_hidden, num_output);
+  net.randomize_weights(-randomWeigtRange, randomWeigtRange);
+  net.set_activation_steepness_output(0.1);
+  numberOfConnections = net.get_total_connections();
+
+  ResetFitness();
+}
 
 void ANNPlayer::CalculateFitness(){
   //const float p_t = 0.05;

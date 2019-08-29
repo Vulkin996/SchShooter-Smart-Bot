@@ -8,7 +8,7 @@
 
 class Bullet : public Colider {
 public:
-	Bullet(float x, float y, float angle, int dmg, float bulletSize, float speed);
+	Bullet(float x, float y, float angle, int dmg, float bulletSize, float speed, int team);
 	~Bullet();
 	void Draw();
 	void StartSparkEffect();
@@ -16,6 +16,7 @@ public:
 
 	b2Body* body;
 	int m_dmg;
+	int m_team;
 	int toDelete;
 
 private:

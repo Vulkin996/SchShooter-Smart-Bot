@@ -16,6 +16,8 @@ enum weaponType{
 	SNIPER
 };
 
+class Player;
+
 class Weapon : public Item{
 public:
 	Weapon(float x, float y, float angle, float pickupDistance, std::string icon);
@@ -23,10 +25,11 @@ public:
 	void Update(bool shoot);
 	void UpdateTimers();
 	void FreeSources();
+  void SetHolder(Player* holder);
 	virtual weaponType getWeaponType();
 
 	virtual void fire();
-    int GetAmmo() const;
+  int GetAmmo() const;
 	int GetAmmoCap() const;
 	float GetReloadTimer() const;
 	int reload(int mag);
@@ -48,6 +51,7 @@ protected:
 	float angle;
 	float recoilAmount;
 	float bulletSIze;
+  Player* m_holder;
 	ALuint soundSource[NUM_OF_SOURCES_WEAP];
 };
 
