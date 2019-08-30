@@ -82,6 +82,7 @@ class playerBrain: public Brain{
 public:
     playerBrain(Player& player);
     float* generateInput();
+		bool hasLineOfSight(Player* target);
 public:
     void Update();
 };
