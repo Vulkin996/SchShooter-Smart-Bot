@@ -1,0 +1,205 @@
+% !TEX encoding = UTF-8 Unicode
+\documentclass[a4paper]{article}
+
+\usepackage{color}
+\usepackage{url}
+\usepackage[T2A]{fontenc} % enable Cyrillic fonts
+\usepackage[utf8]{inputenc} % make weird characters work
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage[english,serbian]{babel}
+\usepackage[most]{tcolorbox}
+%\usepackage[english,serbianc]{babel} %ukljuciti babel sa ovim opcijama, umesto gornjim, ukoliko se koristi cirilica
+
+\usepackage[unicode]{hyperref}
+\hypersetup{colorlinks,citecolor=green,filecolor=green,linkcolor=blue,urlcolor=blue}
+\usepackage{mathtools}
+\usepackage{listings}
+\usepackage{multirow}
+\usepackage{todonotes}
+\newcommand\todos[1]{\textcolor{red}{#1}}
+
+%\newtheorem{primer}{Пример}[section] %ćirilični primer
+\newtheorem{primer}{Primer}[section]
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ 
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}; should come as last argument
+  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  firstnumber=1000,                % start line enumeration with line 1000
+  frame=single,	                   % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  language=Python,                 % the language of the code
+  morekeywords={*,...},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,	                   % sets default tabsize to 2 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+\begin{document}
+
+\title{Hibrid neuronske mreže, genetskog algoritma i reinforcement learninga za igranje top-down shooter igre\\~\\ \small{Seminarski rad u okviru kursa\\Računarska Inteligencija\\ Matematički fakultet}}
+\author{Đaković Branko, Filip Kristić, Krčmarević Mladen\\brankodjakovic08@gmail.com, filip.kristic96@gmail.com\\ mladenk@twodesperados.com}
+
+%\date{9.~april 2015.}
+\maketitle
+
+\abstract{ U radu će biti prikazana upotreba reinforcement learninga i genetskog algoritma za generisanje težina neuronske mreže koja igra top-down shooter igru “Shrodinger's shooter”. Ovaj pristup spada u Neuro-evoluciju\cite{neuroevolution}, sa tim što se menjaju samo težine neruonske mreže dok je struktura fiksna. Za pisanje kodova je korišćen programski jezik C++ i biblioteka FANN sa omotačem za C++. Biće dat kratak opis igre kao i dva rešenja koja se razlikuju po načinu reprezentacije ulaza za neuronsku mrežu.
+} 
+\tableofcontents
+
+\newpage
+
+\section{Uvod}
+\label{sec:uvod}
+\par “Shrodinger's shooter” je shooter igra koju smo razvili za predmet Razvoj Softvera u kojoj je cilj igrača da što duže preživi nalete protivnika. Igrica koristi 2D fiziku uz 3D grafiku a mapa je kvadratnog oblika i sadrži zidove. Moguće akcije igrača su: idi gore, dole, levo, desno kao i dijagonalno kretanje njihovom kombinacijom, podešavanje pozicije nišana, repetiranje oružja i pucanje. Zbog kompleksnosti su izbačeni itemi poput pancira i različitog oružja. Cilj neuronske mreže\cite{neural} je da na osnovu trenutne situacije igrača da njegovu sledeću akciju. 
+%%%%%
+\begin{figure}[h!]
+	\begin{center}
+		\includegraphics[scale=0.18]{igra.png}
+	\end{center}
+	\caption{Schrodinger's shooter}
+	\label{fig:igra}
+\end{figure}
+  
+
+\section{Opis rešenja}
+\label{sec:opisResenja}
+\par Program ima tri moda izvršavanja:
+\begin{tcolorbox}
+./Schshooter.out
+\end{tcolorbox}
+koji obuhvata učitavanje rešenja u vidu neuronske mreže i igranje igrice uz grafički prikaz,
+\begin{tcolorbox}
+./Schshooter.out -t
+\end{tcolorbox}
+koji vrši treniranje bez grafičkog prikaza i
+\begin{tcolorbox}
+./Schshooter.out -tv
+\end{tcolorbox}
+koji vrši treniranje sa grafičkim prikazom.
+
+\newpage
+\par Trening započinje kreiranjem početne generacije genetskog algoritma\cite{genetic} (slika \ref{fig:genetic}.\footnote{Slika preuzeta sa: \url{https://apacheignite.readme.io/docs/genetic-algorithms}})kod koje svaki hromozom ima fitness jednak nuli. Hromozomi su predstavljeni sadržajem tj. nizom brojeva u pokretnom zarezu koji predstavlja težine svih veza mreže i jednim brojem u pokretnom zarezu koji predstavlja fitness tog hromozoma. Težine se uzimaju nasumično iz intervala (-10, 10) koji je takođe nasumično izabran. Broj hromozoma u generaciji kao i broj generacija su izabrani uzimajući u obzir veličinu hromozoma te iznose nekoliko stotina u prvom rešenju a nekoliko hiljada u drugom. O ulazu će više biti rečeno u narednom poglavlju.
+
+\begin{figure}[h!]
+	\begin{center}
+		\includegraphics[scale=0.7]{genetic.png}
+	\end{center}
+	\caption{Genetski algoritam}
+	\label{fig:genetic}
+\end{figure}
+
+\par Nakon kreiranja generacije redom se uzimaju hromozomi i težine veza neuronske mreže se postavljaju na sadržaj hromozoma. Veličina ulaznog sloja u prvom rešenju je 191 a 10 u drugom, oba rešenja imaju samo jedan skriven sloj koji je veličine 10 u prvom zbog ogromnog broja veza usled veličine ulaza i 15 u drugom\todo{ISPRAVI VELIČINE}. Za aktivacionu funkciju je korišćna linearna aproksimacija sigmoidne funkcija. Sigmoidna funkcija je oblika\footnote{Preuzeto iz dokumentacije fann biblioteke. \url{http://leenissen.dk/fann/html/files/fann_cpp-h.html}}
+\begin{tcolorbox}
+\begin{center}
+x - ulaz \\
+y - izlaz \\ 
+s - nagib i \\
+d - derivacija \\
+raspon: 0 < y < 1 \\
+\end{center}
+\begin{equation}
+y = \frac{1}{1 + \mathrm{e}^{-2 \times s \times x}}
+\end{equation}
+\begin{equation}
+d = 2 \times s \times y \times (1 - y)
+\end{equation}
+\end{tcolorbox}
+\noindent dok stopa učenja nije podešena pošto nema nikakvog uticaja na dati problem. Izlazni sloj sadrži pet neurona čiji izlazi imaju vrednosti u inetrvalu [0,1] a koji regulišu kretanje gore-dole, levo-desno, treći ugao pod kojim igrač nišani,da li da puca i da li da dopuni municiju. Prva dva izlaza su podeljena u tri intervala [0,0.33], (0.33-0.66] i (0.66-1] koji redom odgovaraju kretanju gore(levo), bez kretanja i dole(desno), treći izlaz se skalira do 360 i ugao igrača se postavlja na datu vrednost a četvrti i peti daju potvrdan odgovor za vrednosti manje od 0.5 a negativan u suprotnom. U svakoj iteraciji programa se ažuriraju pozicija i akcije igrača u zavisnosti od izlaza mreže. Fitness svakog hromozoma se računa na osnovu broja eliminisanih protivnika i količine štete koje su naneli protivnicima po narednoj formuli a najbolje ocenjen hromozom se čuva.
+\begin{tcolorbox}
+fintess = eliminacije * 50 + šteta * 0.5
+\end{tcolorbox}
+
+\subsection{Selekcija, ukrštanje i mutacija}
+\par Po obradi svih hromozoma generacije, ukoliko ima još iteracija, vrši se selekcija hromozoma koji će učestvovati u izradi nove generacije. Selekcija se vrši ruletskim pristupom, tako što se računa zbir fitness-a svih hromzoma i svaki ima šansu da bude izabran srazmernu odnosu njegovog i celokupnog fitnessa. Nakon izbora hromozoma koji učestvuju u reprodukciji nasumično se biraju dva roditelja i vrše se ukrštanje i mutacija koji su implementirani na različite načine u prvom i drugom rešenju. Svaki par roditelja kreira dva deteta i to se vrši sve dok ne bude ispunjena nova populacija. 
+\begin{tcolorbox}
+\begin{center}
+Ukrštanje u prvom rešenju: \\
+\end{center}
+i - nasumičan broj od 0 do veličine sadržaja hromozoma;\\
+dete1 = sadržaj roditelja1 do i + sadržaj roditelja2 od i do kraja; \\
+dete2 = sadržaj roditelja2 do i + sadržaj roditelja1 od  i do kraja; \\~ \\
+\begin{center}
+Mutacija u prvom rešenju:  \\
+\end{center}
+t - nasumičan broj u pokretnom zarezu iz intervala [0,1];\\
+Ukoliko je t manje od stope mutacije: \\
+\hphantom{tcolorbox}Promeni nasumičan element sadržaja hromozoma;
+\end{tcolorbox}
+
+\begin{tcolorbox}
+\begin{center}
+Ukrštanje u drugom rešenju: \\
+\end{center}
+Za svaki element i sadržaja hromozoma uradi:\\
+\hphantom{tcolorbox}t - nasumičan broj u pokretnom zarezu iz intervala [0,1];\\
+\hphantom{tcolorbox}Ako je t < 0.5: \\
+\hphantom{tcolorbox}\hphantom{tcolorbox}dete1[i] = roditelj1[i]; \\
+\hphantom{tcolorbox}\hphantom{tcolorbox}dete2[i] = roditelj2[i]; \\
+\hphantom{tcolorbox}Inače: \\
+\hphantom{tcolorbox}\hphantom{tcolorbox}dete1[i] =  roditelj2[i]; \\
+\hphantom{tcolorbox}\hphantom{tcolorbox}dete2[i] =  roditelj1[i]; \\~\\
+\begin{center}
+Mutacija u drugom rešenju:  \\
+\end{center}
+Za svaki element i sadržaja hromozoma uradi:\\
+\hphantom{tcolorbox}t - nasumičan broj u pokretnom zarezu iz intervala [0,1];\\
+\hphantom{tcolorbox}Ukoliko je t manje od stope mutacije: \\
+\hphantom{tcolorbox}\hphantom{tcolorbox}Promeni i-ti element sadržaja hromozoma;
+\end{tcolorbox}
+
+\par Celokupan navedeni postupak se zatim obavlja dok nije zadovoljen kriterijum zaustavljanja, tj. dok se ne premaši zadati broj iteracija. Najbolja jednika kao i svi hromozomi poslednje generacije se čuvaju u vidu neuronskih mreža u tekstualnim datotekama radi čuvanja progresa i nastavka treniranja.
+
+\section{Uporedjivanje rešenja}
+\label{sec:uporedjivanjeResenja}
+
+\par U ovom poglavlju biće opisana dva eksperimentalna rešenja problema. Njihova suštinska razlika je način na koji je predstavljen ulaz neuralne mreze igrača, tj. način na koji se opisuje trenutno stanje okoline igrača.
+\subsection {Prvo rešenje:}
+\par U prvom rešenju pokušan je pristup predstavljanja celokupne okoline igrača, naime svako polje na ekranu predstavlja jedan ulazni čvor koji moze imati vrednosti: 0 ako je polje prazno, -1 ako se na njemu nalazi protivnički igrac i 1 ako je u pitanju zid.
+Ovaj unos je poprilično velik jer na ekranu, u datom trenutku, igrač moze da vidi 190 polja, te se to preslikavalo u 190 ulaznih čvorova.
+Trening je vršen na populaciji od 100 jedinki po generaciji u 250 iteracija.
+\newline
+\begin{tcolorbox}
+\begin {center}
+Karakteristike hardvera na kome je vršen trening: \\
+\end {center}
+CPU: intel-i5 2500k \\
+GPU: AMD Radeon 6850 \\
+RAM: 4GB DDR3 \\
+OS: Ubuntu 16.04 \\
+\end{tcolorbox}
+\noindent Vreme trajanja je oko 2h posle čega je dobijena konfiguracija koja nije davala praktično dobre rezultate i zaključeno je da ovaj pristup suštinski ne konvergira ka dobrom rešenju te je pokušan drugi pristup sa drastično smanjenjim ulazom neuralne mreze.
+
+\subsection {Drugo rešenje:}
+
+
+ \newpage
+\section{Zaključak}
+\label{sec:zakljucak}
+
+
+\addcontentsline{toc}{section}{Literatura}
+\bibliography{seminarski} 
+\bibliographystyle{plain}
+
+\end{document}
