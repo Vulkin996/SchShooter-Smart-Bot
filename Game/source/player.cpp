@@ -293,7 +293,7 @@ float* playerBrain::generateInput(){
 			input[k] = 0;
 		}
 	}
-
+	*/
 
 
 	// input[n_input-1] =  (float)Brain::m_player->equiped_weapon->GetAmmo() / Brain::m_player->equiped_weapon->GetAmmoCap();
@@ -374,12 +374,10 @@ void playerBrain::Update(){
 	// for (int i=0; i<5; i++) {
     //     std::cout << output[i] << " ";
     // }
-<<<<<<< HEAD
+
 	// std::cout << std::endl;
 	// std::cout << std::endl;
 
-=======
->>>>>>> 0c2947cf9c71c377ab99deec5f1d3731d537e9c7
 	// std::cout << windowHeight << " " << windowWidth <<std::endl;
 	float vx,vy;
 	if(output[0] < 0.33){
