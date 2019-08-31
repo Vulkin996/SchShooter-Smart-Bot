@@ -266,39 +266,8 @@ float* playerBrain::generateInput(){
 	}
 	input[1] = (float)Brain::m_player->equiped_weapon->GetAmmo() / Brain::m_player->equiped_weapon->GetAmmoCap();
 	return input;
-	/*
-	float h, w;
-	int up, left, n_input, ip, jp;
 
-	h = tan(30 * M_PI / 180) * 4;
-	w = h * windowWidth / windowHeight;
-	up = h/walls[0]->m_edge;
-	left = w/walls[0]->m_edge;
-	n_input = (2*up) * (2*left+1) + 1;
-	float* input = new float[n_input];
-	for(int i = 0; i < n_input-1; i++){
-		input[i] = 0;
-	}
-	ip = map.size()-1-(floor((players[0]->body->GetPosition().y + 9.0)/18*map.size()));
-    jp = floor((players[0]->body->GetPosition().x + 9.0)/18*map.size());
-
-	for(int k = 0; k < n_input-1; k++){
-		int i,j;
-		i = k / (left*2+1)+(ip-up);
-		j = k % (left*2+1)+(jp-left);
-		if(i>=40 || j >=40 || i < 0 || j < 0){
-			continue;ualified-id in declaration before
-		}
-		if(map[i][j]=='#'){
-			input[k] = 0;
-		}
-	}
-	*/
-
-
-	// input[n_input-1] =  (float)Brain::m_player->equiped_weapon->GetAmmo() / Brain::m_player->equiped_weapon->GetAmmoCap();
-	//
-	// return input;
+s
 
 }
 void playerBrain::Update(){
