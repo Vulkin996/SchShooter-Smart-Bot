@@ -173,7 +173,24 @@ Za svaki element i sadržaja hromozoma uradi:\\
 \section{Uporedjivanje rešenja}
 \label{sec:uporedjivanjeResenja}
 
+\par U ovom poglavlju biće opisana dva eksperimentalna rešenja problema. Njihova suštinska razlika je način na koji je predstavljen ulaz neuralne mreze igrača, tj. način na koji se opisuje trenutno stanje okoline igrača.
+\subsection {Prvo rešenje:}
+\par U prvom rešenju pokušan je pristup predstavljanja celokupne okoline igrača, naime svako polje na ekranu predstavlja jedan ulazni čvor koji moze imati vrednosti: 0 ako je polje prazno, -1 ako se na njemu nalazi protivnički igrac i 1 ako je u pitanju zid.
+Ovaj unos je poprilično velik jer na ekranu, u datom trenutku, igrač moze da vidi 190 polja, te se to preslikavalo u 190 ulaznih čvorova.
+Trening je vršen na populaciji od 100 jedinki po generaciji u 250 iteracija.
+\newline
+\begin{tcolorbox}
+\begin {center}
+Karakteristike hardvera na kome je vršen trening: \\
+\end {center}
+CPU: intel-i5 2500k \\
+GPU: AMD Radeon 6850 \\
+RAM: 4GB DDR3 \\
+OS: Ubuntu 16.04 \\
+\end{tcolorbox}
+\noindent Vreme trajanja je oko 2h posle čega je dobijena konfiguracija koja nije davala praktično dobre rezultate i zaključeno je da ovaj pristup suštinski ne konvergira ka dobrom rešenju te je pokušan drugi pristup sa drastično smanjenjim ulazom neuralne mreze.
 
+\subsection {Drugo rešenje:}
 
 
  \newpage
