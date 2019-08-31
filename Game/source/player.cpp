@@ -13,7 +13,8 @@
 #include <Box2D/Box2D.h>
 #include <queue>
 #include <cstdlib>
-
+#include <unistd.h>
+#include "../header/collision.h"
 extern b2World* world;
 extern std::vector< std::vector<char> > map;
 extern std::vector<Player*> players;
@@ -26,7 +27,7 @@ extern ANNPlayer* currentPlayer;
 
 //Number of players that we havent reached in the BFS search
 int num;
-
+unsigned int microseconds = 10000;
 
 
 
@@ -228,57 +229,78 @@ float* playerBrain::generateInput(){
 		}
 	}
 	b2Vec2 dir = players[indexClosest]->body->GetPosition() - players[0]->body->GetPosition();
-	input[0] = atan2((float)dir.y, (float)dir.x);
+	input[0] = -atan2((float)dir.y, (float)dir.x);
 	input[1] = (float)Brain::m_player->equiped_weapon->GetAmmo() / Brain::m_player->equiped_weapon->GetAmmoCap();
 	return input;
-	/*
-	float h, w;
-	int up, left, n_input, ip, jp;
-
-	h = tan(30 * M_PI / 180) * 4;
-	w = h * windowWidth / windowHeight;
-	up = h/walls[0]->m_edge;
-	left = w/walls[0]->m_edge;
-	n_input = (2*up) * (2*left+1) + 1;
-	float* input = new float[n_input];
-	for(int i = 0; i < n_input-1; i++){
-		input[i] = 0;
-	}
 
 
-	ip = map.size()-1-(floor((players[0]->body->GetPosition().y + 9.0)/18*map.size()));
-    jp = floor((players[0]->body->GetPosition().x + 9.0)/18*map.size());
 
-	for(int k = 0; k < n_input-1; k++){
-		int i,j;
-		i = k / (left*2+1)+(ip-up);
-		j = k % (left*2+1)+(jp-left);
-		if(i>=40 || j >=40 || i < 0 || j < 0){
-			continue;
-		}
-		if(map[i][j]=='#'){
-			input[k] = 0;
-		}
-	}
 
-	for(unsigned k=1;k<players.size();++k){
-		if (!players[k]->alive)
-			continue;
-        int i = map.size()-1-(floor((players[k]->body->GetPosition().y + 9.0)/18*map.size()));
-        int j = floor((players[k]->body->GetPosition().x + 9.0)/18*map.size());
-		int input_k;
-		if (!(i > ip + up - 1 || i < ip - up || j > jp + left || j < jp - left)){
-			input_k = (i - (ip-up)) * (2*left+1) + (j - (jp-left));
-			input[input_k] = 1;
-		}
-	}
-	input[n_input-1] =  (float)Brain::m_player->equiped_weapon->GetAmmo() / Brain::m_player->equiped_weapon->GetAmmoCap();
 
-	return input;
-	*/
+
+	// input[n_input-1] =  (float)Brain::m_player->equiped_weapon->GetAmmo() / Brain::m_player->equiped_weapon->GetAmmoCap();
+	//
+	// return input;
+
 }
 void playerBrain::Update(){
 	float* input = generateInput();
+
+	// if(currentPlayer->kills>=2){
+	// float h, w;
+	// int up, left, n_input, ip, jp;
+	//
+	// h = tan(30 * M_PI / 180) * 4;
+	// w = h * windowWidth / windowHeight;
+	// up = h/walls[0]->m_edge;
+	// left = w/walls[0]->m_edge;
+	// n_input = (2*up) * (2*left+1);
+	// float* in = new float[n_input];
+	// for(int i = 0; i < n_input; i++){
+	// 	in[i] = 0;
+	// }
+	//
+	//
+	// ip = map.size()-1-(floor((players[0]->body->GetPosition().y + 9.0)/18*map.size()));
+    // jp = floor((players[0]->body->GetPosition().x + 9.0)/18*map.size());
+	//
+	// for(int k = 0; k < n_input; k++){
+	// 	int i,j;
+	// 	i = k / (left*2+1)+(ip-up);
+	// 	j = k % (left*2+1)+(jp-left);
+	// 	if(i>=40 || j >=40 || i < 0 || j < 0){
+	// 		continue;
+	// 	}
+	// 	if(map[i][j]=='#'){
+	// 		in[k] = 1;
+	// 	}
+	// }
+	//
+	// for(unsigned k=1;k<players.size();++k){
+	// 	if (!players[k]->alive)
+	// 		continue;
+    //     int i = map.size()-1-(floor((players[k]->body->GetPosition().y + 9.0)/18*map.size()));
+    //     int j = floor((players[k]->body->GetPosition().x + 9.0)/18*map.size());
+	// 	int input_k;
+	// 	if (!(i > ip + up - 1 || i < ip - up || j > jp + left || j < jp - left)){
+	// 		input_k = (i - (ip-up)) * (2*left+1) + (j - (jp-left));
+	// 		in[input_k] = 2;
+	// 		// std::cout << players[k]->equiped_weapon->GetAmmo() << " ";
+	// 	}
+	// 	// std::cout <<std::endl;
+	// }
+	//
+	//
+	// 	for(int i = 0; i < n_input; i++){
+	// 		if(i%(2*9+1) == 0 && i != 0){
+	// 			std::cout <<std::endl;
+	// 		}
+	// 		std::cout<<in[i];
+	// 	}
+	// 	std::cout << std::endl;
+	// 	std::cout << std::endl;
+	// 	usleep(microseconds);
+	// }
 
 	// for(unsigned i = 0; i < 190; i++){
 	// 	if(i%(2*9+1) == 0 && i != 0){
@@ -295,9 +317,11 @@ void playerBrain::Update(){
 
 	delete[] input;
 
-	// for (int i=0; i<4; i++) {
+	// for (int i=0; i<5; i++) {
     //     std::cout << output[i] << " ";
     // }
+	// std::cout << std::endl;
+	// std::cout << std::endl;
 
 	// std::cout << windowHeight << " " << windowWidth <<std::endl;
 
@@ -378,12 +402,25 @@ void botBrain::Update(){
     b2Vec2 player_pos(players[0]->body->GetPosition().x, players[0]->body->GetPosition().y);
 
 
+	b2Body* body;
     m_player->see_player = false;
     world->RayCast(&ray_callback, bot_pos, player_pos);
     if(ray_callback.m_fixture){
-        if(ray_callback.m_fixture->GetBody() == players[0]->body)
+		body = ray_callback.m_fixture->GetBody();
+        if(body == players[0]->body){
           m_player->see_player = true;
-    }
+	  	}else{
+			void* o1 = body->GetUserData();
+			if(static_cast<Colider*>(o1)->getClassID()==2){
+			b2Vec2 new_pos(body->GetPosition().x,body->GetPosition().y);
+			world->RayCast(&ray_callback, new_pos, player_pos);
+			if(ray_callback.m_fixture)
+				if(ray_callback.m_fixture->GetBody()== players[0]->body){
+					m_player->see_player = true;
+				}
+			}
+		}
+	  }
 }
 
 void Player::die(){

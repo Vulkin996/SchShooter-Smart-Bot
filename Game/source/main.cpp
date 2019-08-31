@@ -187,6 +187,8 @@ void HandleSimulationStep(){
 			}
 			delete[] gen;
 		}
+
+		// if(trainingEnabled){
 		if(currentNetwork == genetic.generation_size-1){
 			//BRANKOGEN CROSSOVER
 			//I nova populacija i onda ispocetka sve
@@ -252,6 +254,7 @@ void HandleSimulationStep(){
 			currentNetwork++;
 			currentPlayer->SetChromosome(genetic.chromosomes[currentNetwork]->m_content);
 		}
+	// }
 
 		Clean(false);
 		InitGame();
@@ -315,6 +318,7 @@ int main(int argc, char **argv)
 
 	//Setting current scene and initializing
 	currentPlayer = new ANNPlayer(outputFile);
+
 	currentScene = GAME;
 	InitGame();
 

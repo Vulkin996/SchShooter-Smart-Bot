@@ -1,5 +1,5 @@
 #include "../header/annPlayer.h"
-
+#include <iostream>
 const unsigned int num_layers = 3;
 const unsigned int num_input = 2;
 const unsigned int num_hidden = 3;
@@ -9,12 +9,15 @@ extern const float randomWeigtRange = 10;
 
 ANNPlayer::ANNPlayer(){
   MakeBaseNet();
+  printf("Napravio basic mrezu\n");
+  std::cout << numberOfConnections << std::endl;
 };
 
 ANNPlayer::ANNPlayer(std::string file){
   if (!net.create_from_file(file)){
     MakeBaseNet();
     printf("Napravio basic mrezu\n");
+
   }
   else{
     numberOfConnections = net.get_total_connections();
