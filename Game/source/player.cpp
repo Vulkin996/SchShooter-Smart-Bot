@@ -267,8 +267,6 @@ float* playerBrain::generateInput(){
 	input[1] = (float)Brain::m_player->equiped_weapon->GetAmmo() / Brain::m_player->equiped_weapon->GetAmmoCap();
 	return input;
 
-s
-
 }
 void playerBrain::Update(){
 	float* input = generateInput();
