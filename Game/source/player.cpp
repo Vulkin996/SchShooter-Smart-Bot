@@ -235,10 +235,11 @@ bool playerBrain::hasLineOfSight(Player* target){
 				}
 			}
 		}
+		std::cout << "BRE" << std::endl;
 		player_pos.x = ray_callback.m_fixture->GetBody()->GetPosition().x;
 		player_pos.y = ray_callback.m_fixture->GetBody()->GetPosition().y;
 	}
-	while((player_pos.x != player_pos.x) && (player_pos.y != player_pos.y));
+	while((player_pos.x != target_pos.x) && (player_pos.y != target_pos.y));
 	return true;
 }
 
@@ -259,63 +260,60 @@ float* playerBrain::generateInput(){
 
 	if(indexClosest != -1){
 		b2Vec2 dir = players[indexClosest]->body->GetPosition() - players[0]->body->GetPosition();
-		input[0] = atan2((float)dir.y, (float)dir.x);
+		input[0] = (atan2((float)dir.y, (float)dir.x)+M_PI)/(2*M_PI);
 	}
 	else{
 		input[0] = atan2(0,0);
 	}
 	input[1] = (float)Brain::m_player->equiped_weapon->GetAmmo() / Brain::m_player->equiped_weapon->GetAmmoCap();
 	return input;
-
-s
-
 }
 void playerBrain::Update(){
 	float* input = generateInput();
 
-	// if(currentPlayer->kills>=2){
-	// float h, w;
-	// int up, left, n_input, ip, jp;
+	// if(currentPlayer->kills>=3){
+	// 	float h, w;
+	// 	int up, left, n_input, ip, jp;
 	//
-	// h = tan(30 * M_PI / 180) * 4;
-	// w = h * windowWidth / windowHeight;
-	// up = h/walls[0]->m_edge;
-	// left = w/walls[0]->m_edge;
-	// n_input = (2*up) * (2*left+1);
-	// float* in = new float[n_input];
-	// for(int i = 0; i < n_input; i++){
-	// 	in[i] = 0;
-	// }
-	//
-	//
-	// ip = map.size()-1-(floor((players[0]->body->GetPosition().y + 9.0)/18*map.size()));
-    // jp = floor((players[0]->body->GetPosition().x + 9.0)/18*map.size());
-	//
-	// for(int k = 0; k < n_input; k++){
-	// 	int i,j;
-	// 	i = k / (left*2+1)+(ip-up);
-	// 	j = k % (left*2+1)+(jp-left);
-	// 	if(i>=40 || j >=40 || i < 0 || j < 0){
-	// 		continue;
+	// 	h = tan(30 * M_PI / 180) * 4;
+	// 	w = h * windowWidth / windowHeight;
+	// 	up = h/walls[0]->m_edge;
+	// 	left = w/walls[0]->m_edge;
+	// 	n_input = (2*up) * (2*left+1);
+	// 	float* in = new float[n_input];
+	// 	for(int i = 0; i < n_input; i++){
+	// 		in[i] = 0;
 	// 	}
-	// 	if(map[i][j]=='#'){
-	// 		in[k] = 1;
-	// 	}
-	// }
 	//
-	// for(unsigned k=1;k<players.size();++k){
-	// 	if (!players[k]->alive)
-	// 		continue;
-    //     int i = map.size()-1-(floor((players[k]->body->GetPosition().y + 9.0)/18*map.size()));
-    //     int j = floor((players[k]->body->GetPosition().x + 9.0)/18*map.size());
-	// 	int input_k;
-	// 	if (!(i > ip + up - 1 || i < ip - up || j > jp + left || j < jp - left)){
-	// 		input_k = (i - (ip-up)) * (2*left+1) + (j - (jp-left));
-	// 		in[input_k] = 2;
-	// 		// std::cout << players[k]->equiped_weapon->GetAmmo() << " ";
+	//
+	// 	ip = map.size()-1-(floor((players[0]->body->GetPosition().y + 9.0)/18*map.size()));
+	//     jp = floor((players[0]->body->GetPosition().x + 9.0)/18*map.size());
+	//
+	// 	for(int k = 0; k < n_input; k++){
+	// 		int i,j;
+	// 		i = k / (left*2+1)+(ip-up);
+	// 		j = k % (left*2+1)+(jp-left);
+	// 		if(i>=40 || j >=40 || i < 0 || j < 0){
+	// 			continue;
+	// 		}
+	// 		if(map[i][j]=='#'){
+	// 			in[k] = 1;
+	// 		}
 	// 	}
-	// 	// std::cout <<std::endl;
-	// }
+	//
+	// 	for(unsigned k=1;k<players.size();++k){
+	// 		if (!players[k]->alive)
+	// 			continue;
+	//         int i = map.size()-1-(floor((players[k]->body->GetPosition().y + 9.0)/18*map.size()));
+	//         int j = floor((players[k]->body->GetPosition().x + 9.0)/18*map.size());
+	// 		int input_k;
+	// 		if (!(i > ip + up - 1 || i < ip - up || j > jp + left || j < jp - left)){
+	// 			input_k = (i - (ip-up)) * (2*left+1) + (j - (jp-left));
+	// 			in[input_k] = 2;
+	// 			std::cout << players[k]->equiped_weapon->GetAmmo() << " ";
+	// 		}
+	// 		std::cout <<std::endl;
+	// 	}
 	//
 	//
 	// 	for(int i = 0; i < n_input; i++){
@@ -326,6 +324,7 @@ void playerBrain::Update(){
 	// 	}
 	// 	std::cout << std::endl;
 	// 	std::cout << std::endl;
+	// 	delete[] in;
 	// 	usleep(microseconds);
 	// }
 
@@ -375,8 +374,8 @@ void playerBrain::Update(){
 
 
 
-	float angle = output[2]*(2*M_PI);
-	//printf("Angle %f %f\n", output[2], angle);
+	float angle = output[2]*(2*M_PI)-M_PI;
+
 	Brain::m_player->input.angle = angle;
     vx = cos(angle);
     vy = sin(angle);
@@ -419,26 +418,31 @@ void botBrain::Update(){
     b2Vec2 bot_pos(Brain::m_player->body->GetPosition().x, Brain::m_player->body->GetPosition().y);
     b2Vec2 player_pos(players[0]->body->GetPosition().x, players[0]->body->GetPosition().y);
 
-
-	b2Body* body;
     m_player->see_player = false;
-    world->RayCast(&ray_callback, bot_pos, player_pos);
-    if(ray_callback.m_fixture){
-		body = ray_callback.m_fixture->GetBody();
-        if(body == players[0]->body){
-          m_player->see_player = true;
-	  	}else{
-			void* o1 = body->GetUserData();
-			if(static_cast<Colider*>(o1)->getClassID()==2){
-			b2Vec2 new_pos(body->GetPosition().x,body->GetPosition().y);
-			world->RayCast(&ray_callback, new_pos, player_pos);
-			if(ray_callback.m_fixture)
-				if(ray_callback.m_fixture->GetBody()== players[0]->body){
+	do{
+    	world->RayCast(&ray_callback, bot_pos, player_pos);
+    	if(ray_callback.m_fixture){
+			void* object = ray_callback.m_fixture->GetBody()->GetUserData();
+			Colider* c;
+			if(object){
+				c = static_cast<Colider*>(object);
+				std::cout <<c->getClassID() << std::endl;
+				if(c->getClassID() == BLOCK){
 					m_player->see_player = true;
+					break;
 				}
 			}
 		}
-	  }
+		std::cout << "WAT" << std::endl;
+		bot_pos.x = ray_callback.m_fixture->GetBody()->GetPosition().x;
+		bot_pos.y = ray_callback.m_fixture->GetBody()->GetPosition().y;
+		std::cout << "PLAYER: " << player_pos.x <<  " " << player_pos.y << std::endl;
+		std::cout << "FIXTURE: " << bot_pos.x <<  " " << bot_pos.y << std::endl;
+		std::cout << "GUN: " << Brain::m_player->equiped_weapon->getPosX() << " " << Brain::m_player->equiped_weapon->getPosY() << std::endl;
+		std::cout << "BOT: " << Brain::m_player->body->GetPosition().x << " " << Brain::m_player->body->GetPosition().y << std::endl;
+	}while((player_pos.x != bot_pos.x) && (player_pos.y != bot_pos.y));
+	m_player->see_player = !m_player->see_player;
+
 }
 
 void Player::die(){

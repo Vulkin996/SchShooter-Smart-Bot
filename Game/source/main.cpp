@@ -174,6 +174,7 @@ void LoadTextures(){
 }
 
 void HandleSimulationStep(){
+
 	if (GameOver || currentPlayer->timeAlive > 5000){
 		//BRANKOGEN FITNESS
 		//Kraj partije jedne mreze
@@ -187,6 +188,12 @@ void HandleSimulationStep(){
 			}
 			delete[] gen;
 		}
+		
+		// if(currentPlayer->kills > 4){
+		// 	std::cout << "Network: " << currentNetwork << " finished with fitness: " << currentPlayer->m_fitness << " kills: " << currentPlayer->kills << " damage: " << currentPlayer->dmgDone<<" time: " << currentPlayer->timeAlive<<std::endl;
+		//
+		// 	exit(0);
+		// }
 
 		// if(trainingEnabled){
 		if(currentNetwork == genetic.generation_size-1){
@@ -203,18 +210,21 @@ void HandleSimulationStep(){
 			genetic.chromosomes.clear();
 
 			for(unsigned i = 0; i < genetic.generation_size-1; i++){
-	      genetic.chromosomes.push_back(genetic.temp_gen[i]);
-	    }
+	      		genetic.chromosomes.push_back(genetic.temp_gen[i]);
+	    	}
 			genetic.chromosomes.push_back(new Chromosome(genetic.top_chromosome, genetic.target_size));
 			genetic.temp_gen.clear();
 
-			std::cout << "SOLUTION: " << std::endl;
-			for(int j = 0; j < genetic.target_size; j++){
-				std::cout << genetic.top_chromosome->m_content[j]<< " ";
-			}
+			// std::cout << "SOLUTION: " << std::endl;
+			// for(int j = 0; j < genetic.target_size; j++){
+			// 	std::cout << genetic.top_chromosome->m_content[j]<< " ";
+			// }
+			if(genetic.current_iteration == 150){
 			std::cout << std::endl << "Save FITNESS: "<< genetic.top_chromosome->m_fitness << std::endl;
 			currentPlayer->SetChromosome(genetic.top_chromosome->m_content);
 			currentPlayer->net.save(outputFile);
+		}
+
 
 			currentNetwork = 0;
 
@@ -248,6 +258,7 @@ void HandleSimulationStep(){
 				Clean(true);
 				exit(0);
 			}
+			currentPlayer->SetChromosome(genetic.chromosomes[currentNetwork]->m_content);
 			std::cout << "GENERATION: " << genetic.current_iteration << std::endl;
 		}
 		else{

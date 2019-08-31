@@ -311,7 +311,7 @@ void on_timer_game()
 
 			float Gn = 0.18;
 			float Gvx = Gn*cos(myPlayer->input.angle);
-	    float Gvy = Gn*sin(myPlayer->input.angle);
+	    	float Gvy = Gn*sin(myPlayer->input.angle);
 			thrownGrenades[i]->Update(myPlayer->body->GetPosition().x+Gvx, myPlayer->body->GetPosition().y+Gvy);
 		}
 
@@ -421,7 +421,7 @@ void DrawHUDPlayers() {
 
 void DrawBullets() {
 	for (unsigned i = 0; i < bullets.size(); i++) {
-        if( (abs(bullets[i]->body->GetLinearVelocity().x) <= 0.1 && abs(bullets[i]->body->GetLinearVelocity().y) <= 0.1) || bullets[i]->toDelete == 1){
+        if( (std::fabs(bullets[i]->body->GetLinearVelocity().x) <= 0.1 && std::fabs(bullets[i]->body->GetLinearVelocity().y) <= 0.1) || bullets[i]->toDelete == 1){
 					Bullet* tmp = bullets[i];
 					bullets.erase(bullets.begin() + i);
 					delete tmp;

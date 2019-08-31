@@ -8,9 +8,9 @@ extern const float randomWeigtRange;
 
 GeneticAlgorithm::GeneticAlgorithm(){
   iterations = 10;
-  generation_size = 50;
+  generation_size = 100;
   mutation_rate = 0.05;
-  reproduction_size = 10;
+  reproduction_size = 20;
   current_iteration = 0;
   srand(time(0));
 

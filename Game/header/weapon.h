@@ -35,6 +35,12 @@ public:
 	int reload(int mag);
 	void SetPositionAndAngle(float x, float y, float angle);
 	bool allowed_fire;
+    float getPosX() {
+        return pos_x;
+    }
+    float getPosY() {
+        return pos_y;
+    }
 
 protected:
 	int dmg;

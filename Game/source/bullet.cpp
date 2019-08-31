@@ -44,12 +44,12 @@ Bullet::Bullet(float x, float y, float angle, int dmg, float bulletSize, float s
     float vx = speed*cos(angle);
     float vy =  speed*sin(angle);
 
-	
+
 	for (int i = 0; i < TRAIL_LENGTH; i++) {
 		trail[i].x = x;
 		trail[i].y = y;
 	}
-	
+
 
     body->ApplyLinearImpulse(b2Vec2(vx,vy), body->GetWorldCenter(), true);
 
