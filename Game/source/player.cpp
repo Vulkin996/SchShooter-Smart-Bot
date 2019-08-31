@@ -214,13 +214,41 @@ Brain::Brain(Player& player)
 playerBrain::playerBrain(Player& player)
     : Brain(player) {}
 
+
+bool playerBrain::hasLineOfSight(Player* target){
+
+	RayCastCallback ray_callback;
+	b2Vec2 target_pos(target->body->GetPosition().x, target->body->GetPosition().y);
+	b2Vec2 player_pos(players[0]->body->GetPosition().x, players[0]->body->GetPosition().y);
+
+	bool hasLoS = false;
+	do{
+		world->RayCast(&ray_callback, player_pos, target_pos);
+		if(ray_callback.m_fixture){
+			//if it is a wall break and dont apply the damage
+			void* object = ray_callback.m_fixture->GetBody()->GetUserData();
+			Colider* c;
+			if(object){
+				c = static_cast<Colider*>(object);
+				if(c->getClassID() == BLOCK){
+					return hasLoS;
+				}
+			}
+		}
+		player_pos.x = ray_callback.m_fixture->GetBody()->GetPosition().x;
+		player_pos.y = ray_callback.m_fixture->GetBody()->GetPosition().y;
+	}
+	while((player_pos.x != player_pos.x) && (player_pos.y != player_pos.y));
+	return true;
+}
+
 float* playerBrain::generateInput(){
 
 	float* input = new float[2];
-	int indexClosest = 1;
+	int indexClosest = -1;
 	float minDistance = 100000;
 	for (unsigned i=1; i<players.size(); i++){
-		if (players[i]->alive){
+		if (players[i]->alive && hasLineOfSight(players[i])){
 			float distance = (players[0]->body->GetPosition() - players[i]->body->GetPosition()).Length();
 			if (distance < minDistance){
 				indexClosest = i;
@@ -228,13 +256,43 @@ float* playerBrain::generateInput(){
 			}
 		}
 	}
-	b2Vec2 dir = players[indexClosest]->body->GetPosition() - players[0]->body->GetPosition();
-	input[0] = -atan2((float)dir.y, (float)dir.x);
+
+	if(indexClosest != -1){
+		b2Vec2 dir = players[indexClosest]->body->GetPosition() - players[0]->body->GetPosition();
+		input[0] = atan2((float)dir.y, (float)dir.x);
+	}
+	else{
+		input[0] = atan2(0,0);
+	}
 	input[1] = (float)Brain::m_player->equiped_weapon->GetAmmo() / Brain::m_player->equiped_weapon->GetAmmoCap();
 	return input;
+	/*
+	float h, w;
+	int up, left, n_input, ip, jp;
 
+	h = tan(30 * M_PI / 180) * 4;
+	w = h * windowWidth / windowHeight;
+	up = h/walls[0]->m_edge;
+	left = w/walls[0]->m_edge;
+	n_input = (2*up) * (2*left+1) + 1;
+	float* input = new float[n_input];
+	for(int i = 0; i < n_input-1; i++){
+		input[i] = 0;
+	}
+	ip = map.size()-1-(floor((players[0]->body->GetPosition().y + 9.0)/18*map.size()));
+    jp = floor((players[0]->body->GetPosition().x + 9.0)/18*map.size());
 
-
+	for(int k = 0; k < n_input-1; k++){
+		int i,j;
+		i = k / (left*2+1)+(ip-up);
+		j = k % (left*2+1)+(jp-left);
+		if(i>=40 || j >=40 || i < 0 || j < 0){
+			continue;ualified-id in declaration before
+		}
+		if(map[i][j]=='#'){
+			input[k] = 0;
+		}
+	}
 
 
 
@@ -308,26 +366,21 @@ void playerBrain::Update(){
 	// 	}
 	// 	std::cout<<input[i];
 	// }
-	// //
-	// //
-	// //
-	// std::cout << std::endl;
-	// std::cout << std::endl;
 	float* output = currentPlayer->GetOutput(input);
-
+	//test always look at closest enemy:
+	//float angle = input[0];
 	delete[] input;
 
 	// for (int i=0; i<5; i++) {
     //     std::cout << output[i] << " ";
     // }
+<<<<<<< HEAD
 	// std::cout << std::endl;
 	// std::cout << std::endl;
 
+=======
+>>>>>>> 0c2947cf9c71c377ab99deec5f1d3731d537e9c7
 	// std::cout << windowHeight << " " << windowWidth <<std::endl;
-
-	// std::cout << std::endl;
-	// std::cout << std::endl;
-
 	float vx,vy;
 	if(output[0] < 0.33){
 		vy = -1;
@@ -349,12 +402,10 @@ void playerBrain::Update(){
 		vx = 1;
 	}
 
-    // float vx = Brain::m_player->input.horizontal;
-    // float vy = Brain::m_player->input.vertical;
-
     b2Vec2 vel(vx, vy);
 
     Brain::m_player->body->SetLinearVelocity(vel);
+
 
 
 	float angle = output[2]*(2*M_PI);
