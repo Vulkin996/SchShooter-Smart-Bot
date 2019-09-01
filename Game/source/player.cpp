@@ -407,43 +407,49 @@ void botBrain::Update(){
 
     Brain::m_player->body->SetLinearVelocity(vel);
 
-    vx = cos(Brain::m_player->input.angle);
-    vy =  sin(Brain::m_player->input.angle);
-    float n = 0.18;
-
-    Brain::m_player->equiped_weapon->SetPositionAndAngle(Brain::m_player->body->GetPosition().x + vx*n, Brain::m_player->body->GetPosition().y + vy*n, Brain::m_player->input.angle);
-
-		Brain::m_player->moveSoundSource();
 
     RayCastCallback ray_callback;
     b2Vec2 bot_pos(Brain::m_player->body->GetPosition().x, Brain::m_player->body->GetPosition().y);
     b2Vec2 player_pos(players[0]->body->GetPosition().x, players[0]->body->GetPosition().y);
 
-    m_player->see_player = false;
-	do{
-    	world->RayCast(&ray_callback, bot_pos, player_pos);
-    	if(ray_callback.m_fixture){
-			void* object = ray_callback.m_fixture->GetBody()->GetUserData();
-			Colider* c;
-			if(object){
-				c = static_cast<Colider*>(object);
-				std::cout <<c->getClassID() << std::endl;
-				if(c->getClassID() == BLOCK){
-					m_player->see_player = true;
-					break;
+    m_player->see_player = true;
+		if (players[0]->alive){
+			do{
+	    	world->RayCast(&ray_callback, bot_pos, player_pos);
+	    	if(ray_callback.m_fixture){
+					void* object = ray_callback.m_fixture->GetBody()->GetUserData();
+					Colider* c;
+					if(object){
+						c = static_cast<Colider*>(object);
+						std::cout <<c->getClassID() << std::endl;
+						if(ray_callback.m_fixture->GetBody()== players[0]->body){
+							m_player->see_player = false;
+							break;
+						}
+						else if (c->getClassID() != BULLET){
+							m_player->see_player = true;
+							break;
+						}
+					}
 				}
-			}
+				std::cout << "WAT" << std::endl;
+				bot_pos.x = ray_callback.m_fixture->GetBody()->GetPosition().x;
+				bot_pos.y = ray_callback.m_fixture->GetBody()->GetPosition().y;
+				std::cout << "PLAYER: " << player_pos.x <<  " " << player_pos.y << std::endl;
+				std::cout << "FIXTURE: " << bot_pos.x <<  " " << bot_pos.y << std::endl;
+				std::cout << "GUN: " << Brain::m_player->equiped_weapon->getPosX() << " " << Brain::m_player->equiped_weapon->getPosY() << std::endl;
+				std::cout << "BOT: " << Brain::m_player->body->GetPosition().x << " " << Brain::m_player->body->GetPosition().y << std::endl;
+			}while((player_pos.x != bot_pos.x) && (player_pos.y != bot_pos.y));
 		}
-		std::cout << "WAT" << std::endl;
-		bot_pos.x = ray_callback.m_fixture->GetBody()->GetPosition().x;
-		bot_pos.y = ray_callback.m_fixture->GetBody()->GetPosition().y;
-		std::cout << "PLAYER: " << player_pos.x <<  " " << player_pos.y << std::endl;
-		std::cout << "FIXTURE: " << bot_pos.x <<  " " << bot_pos.y << std::endl;
-		std::cout << "GUN: " << Brain::m_player->equiped_weapon->getPosX() << " " << Brain::m_player->equiped_weapon->getPosY() << std::endl;
-		std::cout << "BOT: " << Brain::m_player->body->GetPosition().x << " " << Brain::m_player->body->GetPosition().y << std::endl;
-	}while((player_pos.x != bot_pos.x) && (player_pos.y != bot_pos.y));
-	m_player->see_player = !m_player->see_player;
+		m_player->see_player = !m_player->see_player;
 
+		vx = cos(Brain::m_player->input.angle);
+		vy =  sin(Brain::m_player->input.angle);
+		float n = 0.18;
+
+		Brain::m_player->equiped_weapon->SetPositionAndAngle(Brain::m_player->body->GetPosition().x + vx*n, Brain::m_player->body->GetPosition().y + vy*n, Brain::m_player->input.angle);
+
+		Brain::m_player->moveSoundSource();
 }
 
 void Player::die(){
