@@ -2,7 +2,7 @@
 #include <iostream>
 const unsigned int num_layers = 3;
 const unsigned int num_input = 10;
-const unsigned int num_hidden = 15;
+const unsigned int num_hidden = 6;
 const unsigned int num_output = 5;
 
 extern const float randomWeigtRange = 10;
@@ -30,6 +30,7 @@ void ANNPlayer::MakeBaseNet(){
   net.create_standard(num_layers, num_input, num_hidden, num_output);
   net.randomize_weights(-randomWeigtRange, randomWeigtRange);
   net.set_activation_steepness_output(0.1);
+  //net.set_activation_function_output(FANN::SIN_SYMMETRIC);
   numberOfConnections = net.get_total_connections();
 
   ResetFitness();

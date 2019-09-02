@@ -174,12 +174,29 @@ void LoadTextures(){
 	image_done(image);
 }
 
+int fitnessSum = 0;
+int numberOfPlayerGames = 5;
+int currentPlayerGameNumber = 0;
+
 void HandleSimulationStep(){
 
 	if (GameOver || currentPlayer->timeAlive > 5000){
 		//BRANKOGEN FITNESS
 		//Kraj partije jedne mreze
+
 		currentPlayer->CalculateFitness();
+
+		fitnessSum += currentPlayer->m_fitness;
+		currentPlayerGameNumber++;
+		if (currentPlayerGameNumber < numberOfPlayerGames){
+			Clean(false);
+			InitGame();
+			return;
+		}
+		currentPlayer->m_fitness = fitnessSum/numberOfPlayerGames;
+		fitnessSum = 0;
+		currentPlayerGameNumber = 0;
+
 		std::cout << "Network: " << currentNetwork << " finished with fitness: " << currentPlayer->m_fitness << " kills: " << currentPlayer->kills << " damage: " << currentPlayer->dmgDone<<" time: " << currentPlayer->timeAlive<<std::endl;
 		if(currentPlayer->m_fitness > genetic.top_chromosome->m_fitness){
 			float* gen = currentPlayer->GetChromosome();
@@ -235,10 +252,7 @@ void HandleSimulationStep(){
 			currentPlayer->net.save(outputFile);
 		}
 
-
 			currentNetwork = 0;
-
-
 
 			genetic.current_iteration++;
 			if(genetic.current_iteration > genetic.iterations){
