@@ -109,7 +109,7 @@ koji vrši treniranje sa grafičkim prikazom.
 	\label{fig:genetic}
 \end{figure}
 
-\par Nakon kreiranja generacije redom se uzimaju hromozomi i težine veza neuronske mreže se postavljaju na sadržaj hromozoma. Veličina ulaznog sloja u prvom rešenju je 190, a 10 u drugom. oba rešenja imaju samo jedan skriven sloj koji je veličine 10 u prvom zbog ogromnog broja veza usled veličine ulaza i 15 u drugom\todo{ISPRAVI VELIČINE}. Za aktivacionu funkciju je korišćena linearna aproksimacija sigmoidne funkcije. Sigmoidna funkcija je oblika: \footnote{Preuzeto iz dokumentacije fann biblioteke. \url{http://leenissen.dk/fann/html/files/fann_cpp-h.html}}
+\par Nakon kreiranja generacije redom se uzimaju hromozomi i težine veza neuronske mreže se postavljaju na sadržaj hromozoma. Veličina ulaznog sloja u prvom rešenju je 191, a 10 u drugom. oba rešenja imaju samo jedan skriven sloj koji je veličine 10 u prvom zbog ogromnog broja veza usled veličine ulaza i 8 u drugom. Za aktivacionu funkciju je korišćena linearna aproksimacija sigmoidne funkcije. Sigmoidna funkcija je oblika: \footnote{Preuzeto iz dokumentacije fann biblioteke. \url{http://leenissen.dk/fann/html/files/fann_cpp-h.html}}
 \begin{tcolorbox}
 \begin{center}
 x - ulaz \\
@@ -175,10 +175,10 @@ Za svaki element i sadržaja hromozoma uradi:\\
 
 \par U ovom poglavlju biće opisana dva eksperimentalna rešenja problema. Njihova suštinska razlika je način na koji je predstavljen ulaz neuralne mreze igrača, tj. način na koji se opisuje trenutno stanje okoline igrača.
 \subsection {Prvo rešenje:}
-\par U prvom rešenju pokušali smo sa pristupom predstavljanja celokupne okoline igrača, naime svako polje na ekranu predstavlja jedan ulazni čvor koji može imati vrednosti: 0 ako je polje prazno, -1 ako se na njemu nalazi protivnički igrač i 1 ako je u pitanju zid. Ovaj unos je poprilično velik jer na ekranu, u datom trenutku, igrač može da vidi 190 polja, te se to preslikava u 190 ulaznih čvorova.  Igrač se uvek nalazi na polju (5, 9), tj. u sredini mape koja je na primeru obeleženma sa  “P” radi preglednosti, a prilikom izvršavanja je 0.  
-
+\par U prvom rešenju pokušali smo sa pristupom predstavljanja celokupne okoline igrača, naime svako polje na ekranu predstavlja jedan ulazni čvor koji može imati vrednosti: 0 ako je polje prazno, -1 ako se na njemu nalazi protivnički igrač i 1 ako je u pitanju zid. Ovaj unos je poprilično velik jer na ekranu, u datom trenutku, igrač može da vidi 190 polja, te se to preslikava u 190 ulaznih čvorova i još jedan za kolicinu trenutnu municije.  Igrač se uvek nalazi na polju (5, 9), tj. u sredini mape koja je na primeru obeleženma sa  “P” radi preglednosti, a prilikom izvršavanja je 0.  
+\newline
 \begin{tcolorbox}
-
+\begin {center}
 1000000000000000000 \\
 1000000000000000000\\
 1000000000000000000\\
@@ -189,9 +189,10 @@ Za svaki element i sadržaja hromozoma uradi:\\
 1000000010000000000\\
 1000000010000000000\\
 1000000011111111111\\
+\end{center}
 \end{tcolorbox}
 
-Trening je vršen na populaciji od 100 jedinki po generaciji u 250 iteracija.
+Trening je vršen na populaciji od 300 jedinki po generaciji u 300 iteracija.
 \newline
 \begin{tcolorbox}
 \begin {center}
@@ -202,14 +203,31 @@ GPU: AMD Radeon 6850 \\
 RAM: 4GB DDR3 \\
 OS: Ubuntu 16.04 \\
 \end{tcolorbox}
-\noindent Vreme trajanja je oko 2h posle čega je dobijena konfiguracija koja nije davala dobre rezultate. Zaključeno je da ovaj pristup suštinski ne konvergira ka dobrom rešenju te je primenjen drugi pristup sa drastično smanjenjim ulazom neuralne mreze.
+\noindent Vreme trajanja je oko 8h posle čega je dobijena konfiguracija koja nije davala dobre rezultate. Zaključeno je da ovaj pristup suštinski ne konvergira ka dobrom rešenju te je primenjen drugi pristup sa drastično smanjenjim ulazom neuralne mreze.
 
 \subsection {Drugo rešenje:}
+\par U drugom resenju znatno je smanjen broj ulaznih cvorova. Prvi ulaz je ugao prema najblizem vidljivom protivniku, a drugi trenutna kolicina municije. Okolina je predstavljena preko senzora. Postoji 8 senzora u svakom pravcu od igraca (gore dole levo desno i dijagonale).  Senzori proveravaju broj praznih mesta u svojim pravcima,  postavljaju se na odredjen broj i skaliraju se na interval [0-1] u zavisnosti od ukupnog broja polja do kraja ekrana. 
+
+Ocekivano je da ce ovaj pristup dati smislenije rezultate zbog drasticno manje kolicine ulaznih podataka.
+
+Trening za ovaj pristup vrsen je na populaciji od 400 jedinki po generaciji u 500 iteracija.
+\newline
+\begin{tcolorbox}
+\begin {center}
+Karakteristike hardvera na kome je vršen trening: \\
+\end {center}
+CPU: intel-i5 7300hq \\
+GPU: NVIDIA GeForce 1060 \\
+RAM: 16GB DDR4 \\
+OS: Windows Subsystem for Linux - Ubuntu 18.04 \\
+\end{tcolorbox}
 
 
  \newpage
 \section{Zaključak}
 \label{sec:zakljucak}
+
+\par Tema ovog rada bila je da se prikaze upotreba tehnika "reinforcement learing"-a,  neuronskih mreza i genetskog algoritma u svrhu igranje kompjuterskih igrica tj konkretno igrice "Schrodingers Shooter". Postoji vise nacina na koji moze da se realizuje "racunarski igrac",  predstavljeni pristupi nije dao prakticno dobre rezultate. Podesavanjem parametara i nacina predstavljanja unosnih podataka, kao i razlicitim duzinama treninga pokusano je da se sistem navede na bolja resenja ali idalje nije dobijeno zadovoljavajuce ponasanje. Analizom dobijenih rezultata zakljucujemo da bi se, za ovaj konkretan problem, verovatnije dobili bolji rezultati primenom neke druge metode poput NEAT Algoritma gde se menja cela struktura neuronske mreze u procesu ucenja.
 
 
 \addcontentsline{toc}{section}{Literatura}
