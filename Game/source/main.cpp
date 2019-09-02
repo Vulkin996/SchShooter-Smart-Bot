@@ -174,7 +174,7 @@ void LoadTextures(){
 	image_done(image);
 }
 
-int fitnessSum = 0;
+float fitnessSum = 0;
 int numberOfPlayerGames = 5;
 int currentPlayerGameNumber = 0;
 
