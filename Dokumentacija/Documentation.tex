@@ -71,7 +71,7 @@
 
 \section{Uvod}
 \label{sec:uvod}
-\par “Shrodinger's shooter” je shooter igra koju smo razvili za predmet Razvoj softvera u kojoj je cilj igrača da što duže preživi nalete protivnika. Igrica koristi 2D fiziku uz 3D grafiku, a mapa je kvadratnog oblika i sadrži zidove. Moguće akcije igrača su: “idi gore”, “dole”, “levo”, “desno” kao i dijagonalno kretanje njihovom kombinacijom, podešavanje pozicije nišana, repetiranje oružja i pucanje. Zbog kompleksnosti su izbačeni pancir, granate i različito oružje. Cilj neuronske mreže\cite{neural} je da na osnovu trenutne situacije igrača da njegovu sledeću akciju. 
+\par “Shrodinger's shooter” je shooter igra koju smo razvili za predmet Razvoj softvera u kojoj je cilj igrača da što duže preživi nalete protivnika. Igrica koristi 2D fiziku uz 3D grafiku, a mapa je kvadratnog oblika i sadrži zidove. Moguće akcije igrača su: “idi gore”, “dole”, “levo”, “desno” kao i dijagonalno kretanje njihovom kombinacijom, podešavanje pozicije nišana, repetiranje oružja i pucanje. Zbog kompleksnosti su izbačeni prva pomoć, pancir, granate i različito oružje. Cilj neuronske mreže\cite{neural} je da na osnovu trenutne situacije igrača da njegovu sledeću akciju. 
 %%%%%
 \begin{figure}[h!]
 	\begin{center}
@@ -90,16 +90,16 @@
 \end{tcolorbox}
 koji obuhvata učitavanje rešenja u vidu neuronske mreže i igranje igrice uz grafički prikaz,
 \begin{tcolorbox}
-./Schshooter.out -t
+./Schshooter.out -t brojIteracija
 \end{tcolorbox}
-koji vrši treniranje bez grafičkog prikaza i
+koji vrši treniranje sa brojem iteracija “brojIteracija” bez grafičkog prikaza i
 \begin{tcolorbox}
-./Schshooter.out -tv
+./Schshooter.out -tv brojIteracija
 \end{tcolorbox}
-koji vrši treniranje sa grafičkim prikazom.
+koji vrši treniranje sa brojem iteracija “brojIteracija”  sa grafičkim prikazom.
 
 \newpage
-\par Trening započinje kreiranjem početne generacije genetskog algoritma\cite{genetic} (slika \ref{fig:genetic}.\footnote{Slika preuzeta sa: \url{https://apacheignite.readme.io/docs/genetic-algorithms}})kod koje svaki hromozom ima prilagođenost (fitness) jednak nuli. Hromozomi su predstavljeni sadržajem tj. nizom brojeva u pokretnom zarezu koji predstavlja težine svih veza mreže i jednim brojem u pokretnom zarezu koji predstavlja prilagođenost tog hromozoma. Težine se uzimaju nasumično iz intervala (-10, 10) koji je takođe nasumično izabran. Broj hromozoma u generaciji kao i broj generacija su izabrani uzimajući u obzir veličinu hromozoma te iznose nekoliko stotina u prvom rešenju a nekoliko hiljada u drugom. O ulazu će više biti rečeno u narednom poglavlju.
+\par Trening započinje kreiranjem početne generacije genetskog algoritma\cite{genetic} (slika \ref{fig:genetic}.\footnote{Slika preuzeta sa: \url{https://apacheignite.readme.io/docs/genetic-algorithms}}) kod koje svaki hromozom ima prilagođenost (fitness) jednak nuli. Hromozomi su predstavljeni sadržajem tj. nizom brojeva u pokretnom zarezu koji predstavlja težine svih veza mreže i jednim brojem u pokretnom zarezu koji predstavlja prilagođenost tog hromozoma. Težine se uzimaju nasumično iz intervala (-10, 10) koji je takođe nasumično izabran. Broj hromozoma u generaciji kao i broj generacija u oba rešenja iznose po nekoliko stotina. O ulazu će više biti rečeno u narednom poglavlju.
 
 \begin{figure}[h!]
 	\begin{center}
@@ -125,7 +125,7 @@ y = \frac{1}{1 + \mathrm{e}^{-2 \times s \times x}}
 d = 2 \times s \times y \times (1 - y)
 \end{equation}
 \end{tcolorbox}
-\noindent  Stopa učenja nije podešena pošto nema nikakvog uticaja na dati problem. Izlazni sloj sadrži pet neurona čiji izlazi imaju vrednosti u intervalu [0,1] a koji regulišu kretanje gore-dole, levo-desno, treći ugao pod kojim igrač nišani,da li da puca i da li da dopuni municiju. Prva dva izlaza su podeljena u tri intervala [0,0.33], (0.33-0.66] i (0.66-1] koji redom odgovaraju kretanju gore (levo), bez kretanja i dole (desno). Treći izlaz se skalira do 360\todo{DO 2 PI} i ugao igrača se postavlja na datu vrednost a četvrti i peti daju potvrdan odgovor za vrednosti manje od 0.5, a negativan u suprotnom. U svakoj iteraciji programa se ažuriraju pozicija i akcije igrača u zavisnosti od izlaza mreže. Prilagođenost svakog hromozoma se računa na osnovu broja eliminisanih protivnika i količine štete koje su naneli protivnicima po narednoj formuli, a najbolje ocenjen hromozom se čuva.
+\noindent  Stopa učenja nije podešena pošto nema nikakvog uticaja na dati problem. Izlazni sloj sadrži pet neurona čiji izlazi imaju vrednosti u intervalu [0,1] a koji regulišu kretanje gore-dole, levo-desno, treći ugao pod kojim igrač nišani,da li da puca i da li da dopuni municiju. Prva dva izlaza su podeljena u tri intervala [0,0.33], (0.33-0.66] i (0.66-1] koji redom odgovaraju kretanju gore (levo), bez kretanja i dole (desno). Treći izlaz se skalira na [-$\pi$, $\pi$] i ugao igrača se postavlja na datu vrednost a četvrti i peti daju potvrdan odgovor za vrednosti manje od 0.5, a negativan u suprotnom. U svakoj iteraciji programa se ažuriraju pozicija i akcije igrača u zavisnosti od izlaza mreže. “Reinforcement learing” se koristi prilikom izračunavanja prilagođenosti svakog hromozoma tako što za svaku dobru akciju u vidu eliminacija ili nanošenja štete hromozom dobija nagradu u vidu poena. Prilagođenost se računa na osnovu naredne formule, a najbolje ocenjen hromozom se čuva.
 \begin{tcolorbox}
 fintess = eliminacije * 50 + šteta * 0.5
 \end{tcolorbox}
@@ -174,8 +174,8 @@ Za svaki element i sadržaja hromozoma uradi:\\
 \label{sec:uporedjivanjeResenja}
 
 \par U ovom poglavlju biće opisana dva eksperimentalna rešenja problema. Njihova suštinska razlika je način na koji je predstavljen ulaz neuralne mreze igrača, tj. način na koji se opisuje trenutno stanje okoline igrača.
-\subsection {Prvo rešenje:}
-\par U prvom rešenju pokušali smo sa pristupom predstavljanja celokupne okoline igrača, naime svako polje na ekranu predstavlja jedan ulazni čvor koji može imati vrednosti: 0 ako je polje prazno, -1 ako se na njemu nalazi protivnički igrač i 1 ako je u pitanju zid. Ovaj unos je poprilično velik jer na ekranu, u datom trenutku, igrač može da vidi 190 polja, te se to preslikava u 190 ulaznih čvorova i još jedan za kolicinu trenutnu municije.  Igrač se uvek nalazi na polju (5, 9), tj. u sredini mape koja je na primeru obeleženma sa  “P” radi preglednosti, a prilikom izvršavanja je 0.  
+\subsection {Prvo rešenje}
+\par U prvom rešenju pokušali smo sa pristupom predstavljanja celokupne okoline igrača, naime svako polje na ekranu predstavlja jedan ulazni čvor koji može imati vrednosti: 0 ako je polje prazno, -1 ako se na njemu nalazi protivnički igrač i 1 ako je u pitanju zid. Ovaj unos je poprilično velik jer na ekranu, u datom trenutku, igrač može da vidi 190 polja, te se to preslikava u 190 ulaznih čvorova i još jedan za količinu trenutne municije.  Igrač se uvek nalazi na polju (5, 9), tj. u sredini mape koja je na primeru obeleženma sa  “P” radi preglednosti, a prilikom izvršavanja je 0.  
 \newline
 \begin{tcolorbox}
 \begin {center}
@@ -205,10 +205,10 @@ OS: Ubuntu 16.04 \\
 \end{tcolorbox}
 \noindent Vreme trajanja je oko 8h posle čega je dobijena konfiguracija koja nije davala dobre rezultate. Zaključeno je da ovaj pristup suštinski ne konvergira ka dobrom rešenju te je primenjen drugi pristup sa drastično smanjenjim ulazom neuralne mreze.
 
-\subsection {Drugo rešenje:}
-\par U drugom resenju znatno je smanjen broj ulaznih cvorova. Prvi ulaz je ugao prema najblizem vidljivom protivniku, a drugi trenutna kolicina municije. Okolina je predstavljena preko senzora. Postoji 8 senzora u svakom pravcu od igraca (gore dole levo desno i dijagonale).  Senzori proveravaju broj praznih mesta u svojim pravcima,  postavljaju se na odredjen broj i skaliraju se na interval [0-1] u zavisnosti od ukupnog broja polja do kraja ekrana. 
+\subsection {Drugo rešenje}
+\par U drugom rešenju znatno je smanjen broj ulaznih čvorova. Prvi ulaz je ugao prema najblizem vidljivom protivniku, a drugi trenutna kolicina municije. Okolina je predstavljena preko senzora. Postoji 8 senzora, po jedan u svakom pravcu od igrača (gore, dole, levo, desno i dijagonale).  Senzori proveravaju broj praznih mesta u svojim pravcima,  postavljaju se na određen broj i skaliraju na interval [0, 1] u odnosu na ukupan broj polja do kraja ekrana. 
 
-Ocekivano je da ce ovaj pristup dati smislenije rezultate zbog drasticno manje kolicine ulaznih podataka.
+Ocekivano je da ce ovaj pristup dati smislenije rezultate zbog drastično manje kolicine ulaznih podataka, ali su dobijeni slični rezultati kao kod prvog rešenja.
 
 Trening za ovaj pristup vrsen je na populaciji od 400 jedinki po generaciji u 500 iteracija.
 \newline
@@ -227,7 +227,7 @@ OS: Windows Subsystem for Linux - Ubuntu 18.04 \\
 \section{Zaključak}
 \label{sec:zakljucak}
 
-\par Tema ovog rada bila je da se prikaze upotreba tehnika "reinforcement learing"-a,  neuronskih mreza i genetskog algoritma u svrhu igranje kompjuterskih igrica tj konkretno igrice "Schrodingers Shooter". Postoji vise nacina na koji moze da se realizuje "racunarski igrac",  predstavljeni pristupi nije dao prakticno dobre rezultate. Podesavanjem parametara i nacina predstavljanja unosnih podataka, kao i razlicitim duzinama treninga pokusano je da se sistem navede na bolja resenja ali idalje nije dobijeno zadovoljavajuce ponasanje. Analizom dobijenih rezultata zakljucujemo da bi se, za ovaj konkretan problem, verovatnije dobili bolji rezultati primenom neke druge metode poput NEAT Algoritma gde se menja cela struktura neuronske mreze u procesu ucenja.
+\par Tema ovog rada bila je da se prikaže upotreba tehnika “reinforcement learing”-a,  neuronskih mreza i genetskog algoritma u svrhu igranja kompjuterskih igrica tj konkretno igrice “Shrodinger's shooter”. Postoji više nacina na koji moze da se realizuje “računarski igrač”,  predstavljeni pristup nije dao dobre rezultate. Podešavanjem parametara i načina predstavljanja unosnih podataka, kao i različitim dužinama treninga pokusano je da se sistem navede na bolja resenja ali idalje nije dobijeno zadovoljavajuće ponašanje. Analizom dobijenih rezultata zaključujemo da za dati problem nije dovoljno samo menjanje težine i da bi se, za ovaj konkretan problem, verovatnije dobili bolji rezultati primenom neke druge metode poput NEAT\cite{neat}  Algoritma gde se menja cela struktura neuronske mreze u procesu učenja.
 
 
 \addcontentsline{toc}{section}{Literatura}
