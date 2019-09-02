@@ -23,6 +23,7 @@
 
 //Current network
 const std::string outputFile = "fann.txt";
+const std::string outputFileTest = "fannTest.txt";
 const std::string outputFolderFile = "fanns/fann";
 ANNPlayer* currentPlayer;
 
@@ -188,7 +189,13 @@ void HandleSimulationStep(){
 			}
 			delete[] gen;
 		}
-		
+		// if(currentPlayer->timeAlive > 5000){
+		// 	std::cout << std::endl << "Save FITNESS: "<< genetic.top_chromosome->m_fitness << std::endl;
+		// 	currentPlayer->SetChromosome(genetic.top_chromosome->m_content);
+		// 	currentPlayer->net.save(outputFileTest);
+		// 	exit(0);
+		// }
+
 		// if(currentPlayer->kills > 4){
 		// 	std::cout << "Network: " << currentNetwork << " finished with fitness: " << currentPlayer->m_fitness << " kills: " << currentPlayer->kills << " damage: " << currentPlayer->dmgDone<<" time: " << currentPlayer->timeAlive<<std::endl;
 		//
@@ -221,6 +228,9 @@ void HandleSimulationStep(){
 			// }
 			if(genetic.current_iteration == 150){
 			std::cout << std::endl << "Save FITNESS: "<< genetic.top_chromosome->m_fitness << std::endl;
+			for(int j = 0; j < genetic.target_size; j++){
+				std::cout << genetic.top_chromosome->m_content[j]<< " ";
+			}
 			currentPlayer->SetChromosome(genetic.top_chromosome->m_content);
 			currentPlayer->net.save(outputFile);
 		}

@@ -276,6 +276,7 @@ void on_timer_game()
 				players[i]->die();
 				if(i!=0){
 					currentPlayer->kills+=1;
+					players[0]->IncreaseHealth(25);
 				}
 			}
 
@@ -421,7 +422,7 @@ void DrawHUDPlayers() {
 
 void DrawBullets() {
 	for (unsigned i = 0; i < bullets.size(); i++) {
-        if( (std::fabs(bullets[i]->body->GetLinearVelocity().x) <= 0.1 && std::fabs(bullets[i]->body->GetLinearVelocity().y) <= 0.1) || bullets[i]->toDelete == 1){
+        if((std::fabs(bullets[i]->body->GetLinearVelocity().x) <= 0.1 && std::fabs(bullets[i]->body->GetLinearVelocity().y) <= 0.1) || bullets[i]->toDelete == 1){
 					Bullet* tmp = bullets[i];
 					bullets.erase(bullets.begin() + i);
 					delete tmp;

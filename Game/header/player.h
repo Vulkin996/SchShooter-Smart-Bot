@@ -31,6 +31,7 @@ public:
 	void SetMaxArmor(int ma);
 	void SetAmmo(int am);
 	int GetAmmo();
+    int GetHealth();
 	void FillArmor();
 	void SwitchToSecondary();
 	void moveSoundSource();

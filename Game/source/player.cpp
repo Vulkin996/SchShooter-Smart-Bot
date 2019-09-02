@@ -1,5 +1,6 @@
 #include "../header/player.h"
 #include "../header/weapon.h"
+#include "../header/bullet.h"
 #include "../header/util.h"
 #include "../header/particleSystem.h"
 #include "../header/geometry.h"
@@ -23,11 +24,11 @@ extern float windowWidth, windowHeight;
 extern std::map<std::string, int> sounds;
 extern std::vector<Block*> walls;
 extern ANNPlayer* currentPlayer;
-
+extern std::vector<Bullet*> bullets;
 
 //Number of players that we havent reached in the BFS search
 int num;
-unsigned int microseconds = 10000;
+unsigned int microseconds = 50000;
 
 
 
@@ -98,7 +99,7 @@ void Player::SetAmmo(int am){
 }
 
 int Player::GetAmmo(){return ammo;}
-
+int Player::GetHealth(){return health;}
 
 //Freeing sounds bound to player
 void Player::FreeSources(){
@@ -222,6 +223,7 @@ bool playerBrain::hasLineOfSight(Player* target){
 	b2Vec2 player_pos(players[0]->body->GetPosition().x, players[0]->body->GetPosition().y);
 
 	bool hasLoS = false;
+	int it = 0;
 	do{
 		world->RayCast(&ray_callback, player_pos, target_pos);
 		if(ray_callback.m_fixture){
@@ -234,18 +236,36 @@ bool playerBrain::hasLineOfSight(Player* target){
 					return hasLoS;
 				}
 			}
+			player_pos.x = ray_callback.m_fixture->GetBody()->GetPosition().x;
+			player_pos.y = ray_callback.m_fixture->GetBody()->GetPosition().y;
+
+
+			if(it>=7){
+				for(unsigned i = 0; i < bullets.size(); i++){
+					if(ray_callback.m_fixture->GetBody() == bullets[i]->body){
+						// std::cout << "WINNER" << std::endl;
+						Bullet* tmp = bullets[i];
+						bullets.erase(bullets.begin() + i);
+						delete tmp;
+					}
+					else if((std::fabs(bullets[i]->body->GetLinearVelocity().x) <= 0.1 && std::fabs(bullets[i]->body->GetLinearVelocity().y) <= 0.1) || bullets[i]->toDelete == 1){
+						Bullet* tmp = bullets[i];
+						bullets.erase(bullets.begin() + i);
+						delete tmp;
+					}
+				}
+			}
 		}
-		std::cout << "BRE" << std::endl;
-		player_pos.x = ray_callback.m_fixture->GetBody()->GetPosition().x;
-		player_pos.y = ray_callback.m_fixture->GetBody()->GetPosition().y;
+		it++;
+		// std::cout << "BRE" << std::endl;
+
 	}
 	while((player_pos.x != target_pos.x) && (player_pos.y != target_pos.y));
 	return true;
 }
 
 float* playerBrain::generateInput(){
-
-	float* input = new float[2];
+	float* input = new float[10];
 	int indexClosest = -1;
 	float minDistance = 100000;
 	for (unsigned i=1; i<players.size(); i++){
@@ -266,75 +286,179 @@ float* playerBrain::generateInput(){
 		input[0] = atan2(0,0);
 	}
 	input[1] = (float)Brain::m_player->equiped_weapon->GetAmmo() / Brain::m_player->equiped_weapon->GetAmmoCap();
+
+	// ######################### CREATING MAP AROUND THE PLAYER ################################
+	float h, w;
+	int up, left, ip, jp, n, m;
+
+	h = tan(30 * M_PI / 180) * 4;
+	w = h * windowWidth / windowHeight;
+	up = h/walls[0]->m_edge;
+	left = w/walls[0]->m_edge;
+	n = (2*up);
+	m = (2*left+1);
+
+	std::vector<std::vector<char>> in;
+	for(int i = 0; i < n; i++){
+		std::vector<char> tmp;
+		for(int j = 0; j < m; j++){
+			tmp.push_back(' ');
+		}
+		in.push_back(tmp);
+	}
+
+
+	ip = map.size()-1-(floor((players[0]->body->GetPosition().y + 9.0)/18*map.size()));
+	jp = floor((players[0]->body->GetPosition().x + 9.0)/18*map.size());
+	int ih, jh;
+	for(int i = 0; i < n; i++){
+		for(int j = 0; j < m; j++){
+			ih = i+(ip-up);
+			jh = j+(jp-left);
+			if(ih>=40 || jh >=40 || ih < 0 || jh < 0){
+				continue;
+			}
+			if(map[ih][jh]=='#'){
+				in[i][j] = '#';
+			}
+		}
+	}
+
+
+	// std::cout <<"PLAYER HP: "<< players[0]->GetHealth() << " PLAYER KILLS: " << currentPlayer->kills << std::endl;
+	// std::cout << players[0]->equiped_weapon->GetAmmo() << std::endl;
+	for(unsigned k=1;k<players.size();++k){
+		if (!players[k]->alive)
+			continue;
+		int i = map.size()-1-(floor((players[k]->body->GetPosition().y + 9.0)/18*map.size()));
+		int j = floor((players[k]->body->GetPosition().x + 9.0)/18*map.size());
+		if (!(i > ip + up - 1 || i < ip - up || j > jp + left || j < jp - left)){
+			ih = i-(ip-up);
+			jh = j-(jp-left);
+			in[ih][jh] = 'B';
+
+
+		}
+		// std::cout <<"BOT HP: "<< players[k]->GetHealth() << std::endl;
+		// std::cout <<"BOT LOS: "<< players[k]->see_player << std::endl;
+		// std::cout << players[k]->equiped_weapon->GetAmmo() <<  std::endl;;
+	}
+
+	in[up][left]= 'P';
+
+
+	// for(int i = 0; i < n; i++){
+	// 	for(int j = 0; j < m; j++){
+	// 		std::cout<<in[i][j];
+	// 	}
+	// 	std::cout <<std::endl;
+	// }
+	//
+	// std::cout << std::endl;
+	// std::cout << std::endl;
+	// usleep(microseconds);
+
+	//############### CALCULATING UP DOWN LEFT RIGHT AND DIAGONAL ########
+	// input[2] = FREE SPACE UP
+	// input[3] = FREE SPACE DOWN
+	// input[4] = FREE SPACE LEFT
+	// input[5] = FREE SPACE RIGHT
+	// input[6] = FREE SPACE UPLEFT
+	// input[7] = FREE SPACE UPRIGHT
+	// input[8] = FREE SPACE DOWNLEFT
+	// input[9] = FREE SPACE DOWNRIGHT
+
+
+	//UP
+	for(int i = 1; i < up+1; i++){
+		if(in[up-i][left] == '#' || in[up-i][left] == 'B'){
+			input[2] = (i-1)*1.0/up;
+			break;
+		}
+		if(i==up){
+			input[2]=1.0;
+		}
+	}
+	//DOWN
+	for(int i = 1; i < up; i++){
+		if(in[up+i][left] == '#' || in[up-i][left] == 'B'){
+			input[3] = (i-1)*1.0/(up-1);
+			break;
+		}
+		if(i==up-1){
+			input[3]=1.0;
+		}
+	}
+	//LEFT
+	for(int i = 1; i < left+1; i++){
+		if(in[up][left-i] == '#' || in[up][left-i] == 'B'){
+			input[4] = (i-1)*1.0/left;
+			break;
+		}
+		if(i==left){
+			input[4]=1.0;
+		}
+	}
+	//RIGHT
+	for(int i = 1; i < left+1; i++){
+		if(in[up][left+i] == '#' || in[up][left+i] == 'B'){
+			input[5] = (i-1)*1.0/left;
+			break;
+		}
+		if(i==left){
+			input[5]=1.0;
+		}
+	}
+	//UPLEFT
+	for(int i = 1; i < up+1; i++){
+		if(in[up-i][left-i] == '#' || in[up-i][left-i] == 'B'){
+			input[6] = (i-1)*1.0/up;
+			break;
+		}
+		if(i==up){
+			input[6]=1.0;
+		}
+	}
+	//UPRIGHT
+	for(int i = 1; i < up+1; i++){
+		if(in[up-i][left+i] == '#' || in[up-i][left+i] == 'B'){
+			input[7] = (i-1)*1.0/up;
+			break;
+		}
+		if(i==up){
+			input[7]=1.0;
+		}
+	}
+	//DOWNLEFT
+	for(int i = 1; i < up; i++){
+		if(in[up+i][left-i] == '#' || in[up+i][left-i] == 'B'){
+			input[8] = (i-1)*1.0/(up-1);
+			break;
+		}
+		if(i==up-1){
+			input[8]=1.0;
+		}
+	}
+	//DOWNRIGHT
+	for(int i = 1; i < up; i++){
+		if(in[up+i][left+i] == '#' || in[up+i][left+i] == 'B'){
+			input[9] = (i-1)*1.0/(up-1);
+			break;
+		}
+		if(i==up-1){
+			input[9]=1.0;
+		}
+	}
+
+
 	return input;
 
 }
 void playerBrain::Update(){
 	float* input = generateInput();
 
-	// if(currentPlayer->kills>=3){
-	// 	float h, w;
-	// 	int up, left, n_input, ip, jp;
-	//
-	// 	h = tan(30 * M_PI / 180) * 4;
-	// 	w = h * windowWidth / windowHeight;
-	// 	up = h/walls[0]->m_edge;
-	// 	left = w/walls[0]->m_edge;
-	// 	n_input = (2*up) * (2*left+1);
-	// 	float* in = new float[n_input];
-	// 	for(int i = 0; i < n_input; i++){
-	// 		in[i] = 0;
-	// 	}
-	//
-	//
-	// 	ip = map.size()-1-(floor((players[0]->body->GetPosition().y + 9.0)/18*map.size()));
-	//     jp = floor((players[0]->body->GetPosition().x + 9.0)/18*map.size());
-	//
-	// 	for(int k = 0; k < n_input; k++){
-	// 		int i,j;
-	// 		i = k / (left*2+1)+(ip-up);
-	// 		j = k % (left*2+1)+(jp-left);
-	// 		if(i>=40 || j >=40 || i < 0 || j < 0){
-	// 			continue;
-	// 		}
-	// 		if(map[i][j]=='#'){
-	// 			in[k] = 1;
-	// 		}
-	// 	}
-	//
-	// 	for(unsigned k=1;k<players.size();++k){
-	// 		if (!players[k]->alive)
-	// 			continue;
-	//         int i = map.size()-1-(floor((players[k]->body->GetPosition().y + 9.0)/18*map.size()));
-	//         int j = floor((players[k]->body->GetPosition().x + 9.0)/18*map.size());
-	// 		int input_k;
-	// 		if (!(i > ip + up - 1 || i < ip - up || j > jp + left || j < jp - left)){
-	// 			input_k = (i - (ip-up)) * (2*left+1) + (j - (jp-left));
-	// 			in[input_k] = 2;
-	// 			std::cout << players[k]->equiped_weapon->GetAmmo() << " ";
-	// 		}
-	// 		std::cout <<std::endl;
-	// 	}
-	//
-	//
-	// 	for(int i = 0; i < n_input; i++){
-	// 		if(i%(2*9+1) == 0 && i != 0){
-	// 			std::cout <<std::endl;
-	// 		}
-	// 		std::cout<<in[i];
-	// 	}
-	// 	std::cout << std::endl;
-	// 	std::cout << std::endl;
-	// 	delete[] in;
-	// 	usleep(microseconds);
-	// }
 
-	// for(unsigned i = 0; i < 190; i++){
-	// 	if(i%(2*9+1) == 0 && i != 0){
-	// 		std::cout <<std::endl;
-	// 	}
-	// 	std::cout<<input[i];
-	// }
+
 	float* output = currentPlayer->GetOutput(input);
 	//test always look at closest enemy:
 	//float angle = input[0];
@@ -380,8 +504,8 @@ void playerBrain::Update(){
 	Brain::m_player->input.angle = angle;
     vx = cos(angle);
     vy = sin(angle);
-    float n = 0.18;
-    Brain::m_player->equiped_weapon->SetPositionAndAngle(Brain::m_player->body->GetPosition().x + vx*n, Brain::m_player->body->GetPosition().y + vy*n, angle);
+    float a = 0.18;
+    Brain::m_player->equiped_weapon->SetPositionAndAngle(Brain::m_player->body->GetPosition().x + vx*a, Brain::m_player->body->GetPosition().y + vy*a, angle);
 
 	if(output[3] < 0.5){
 		Brain::m_player->input.shoot = true;
@@ -407,11 +531,18 @@ void botBrain::Update(){
 
     Brain::m_player->body->SetLinearVelocity(vel);
 
+	vx = cos(Brain::m_player->input.angle);
+	vy =  sin(Brain::m_player->input.angle);
+	float n = 0.18;
+
+	Brain::m_player->equiped_weapon->SetPositionAndAngle(Brain::m_player->body->GetPosition().x + vx*n, Brain::m_player->body->GetPosition().y + vy*n, Brain::m_player->input.angle);
+
+	Brain::m_player->moveSoundSource();
 
     RayCastCallback ray_callback;
     b2Vec2 bot_pos(Brain::m_player->body->GetPosition().x, Brain::m_player->body->GetPosition().y);
     b2Vec2 player_pos(players[0]->body->GetPosition().x, players[0]->body->GetPosition().y);
-
+	int it = 0;
     m_player->see_player = true;
 		if (players[0]->alive){
 			do{
@@ -421,7 +552,7 @@ void botBrain::Update(){
 					Colider* c;
 					if(object){
 						c = static_cast<Colider*>(object);
-						std::cout <<c->getClassID() << std::endl;
+						// std::cout <<c->getClassID() << std::endl;
 						if(ray_callback.m_fixture->GetBody()== players[0]->body){
 							m_player->see_player = false;
 							break;
@@ -431,25 +562,38 @@ void botBrain::Update(){
 							break;
 						}
 					}
+					bot_pos.x = ray_callback.m_fixture->GetBody()->GetPosition().x;
+					bot_pos.y = ray_callback.m_fixture->GetBody()->GetPosition().y;
+					if(it>=7){
+						for(unsigned i = 0; i < bullets.size(); i++){
+							if(ray_callback.m_fixture->GetBody() == bullets[i]->body){
+								// std::cout << "WINNER" << std::endl;
+								Bullet* tmp = bullets[i];
+								bullets.erase(bullets.begin() + i);
+								delete tmp;
+							}
+							else if((std::fabs(bullets[i]->body->GetLinearVelocity().x) <= 0.1 && std::fabs(bullets[i]->body->GetLinearVelocity().y) <= 0.1) || bullets[i]->toDelete == 1){
+								Bullet* tmp = bullets[i];
+								bullets.erase(bullets.begin() + i);
+								delete tmp;
+							}
+						}
+					}
+					// std::cout << "WAT" << std::endl;
+					//
+					// std::cout << "PLAYER: " << player_pos.x <<  " " << player_pos.y << std::endl;
+					// std::cout << "FIXTURE: " << bot_pos.x <<  " " << bot_pos.y << std::endl;
+					// std::cout << "GUN: " << Brain::m_player->equiped_weapon->getPosX() << " " << Brain::m_player->equiped_weapon->getPosY() << std::endl;
+					// std::cout << "BOT: " << Brain::m_player->body->GetPosition().x << " " << Brain::m_player->body->GetPosition().y << std::endl;
 				}
-				std::cout << "WAT" << std::endl;
-				bot_pos.x = ray_callback.m_fixture->GetBody()->GetPosition().x;
-				bot_pos.y = ray_callback.m_fixture->GetBody()->GetPosition().y;
-				std::cout << "PLAYER: " << player_pos.x <<  " " << player_pos.y << std::endl;
-				std::cout << "FIXTURE: " << bot_pos.x <<  " " << bot_pos.y << std::endl;
-				std::cout << "GUN: " << Brain::m_player->equiped_weapon->getPosX() << " " << Brain::m_player->equiped_weapon->getPosY() << std::endl;
-				std::cout << "BOT: " << Brain::m_player->body->GetPosition().x << " " << Brain::m_player->body->GetPosition().y << std::endl;
+
+
+				it++;
 			}while((player_pos.x != bot_pos.x) && (player_pos.y != bot_pos.y));
 		}
 		m_player->see_player = !m_player->see_player;
 
-		vx = cos(Brain::m_player->input.angle);
-		vy =  sin(Brain::m_player->input.angle);
-		float n = 0.18;
 
-		Brain::m_player->equiped_weapon->SetPositionAndAngle(Brain::m_player->body->GetPosition().x + vx*n, Brain::m_player->body->GetPosition().y + vy*n, Brain::m_player->input.angle);
-
-		Brain::m_player->moveSoundSource();
 }
 
 void Player::die(){
@@ -582,7 +726,7 @@ void Move(int ip, int jp,std::vector<std::vector<int>>& pathMap){
                 players[k]->input.horizontal-=1;
 
             }
-            else if(pathMap[i+1][j+1] == pathMap[ip][jp]-1&& pathMap[ip][jp]-1 != 0 && map[i+1][j] != '#' && map[i][j+1] != '#'){
+            else if(pathMap[i+1][j+1] == pathMap[ip][jp]-1 && pathMap[ip][jp]-1 != 0 && map[i+1][j] != '#' && map[i][j+1] != '#'){
                 players[k]->input.horizontal+=1;
                 players[k]->input.vertical-=1;
             }
@@ -598,13 +742,13 @@ void Move(int ip, int jp,std::vector<std::vector<int>>& pathMap){
                 minl = pathMap[i][j-1];
                 minr = pathMap[i][j+1];
 
-                if(minu == -1)
+                if(minu == -1 || minu == -2)
                     minu = map.size()*map.size();
-                if(mind == -1)
+                if(mind == -1 || mind == -2)
                     mind = map.size()*map.size();
-                if(minl == -1)
+                if(minl == -1 || minl == -2)
                     minl = map.size()*map.size();
-                if(minr == -1)
+                if(minr == -1 || minr == -1)
                     minr = map.size()*map.size();
 
                 minimum = std::min(minu, std::min(mind, std::min(minl,minr)));
@@ -641,6 +785,7 @@ void Move(int ip, int jp,std::vector<std::vector<int>>& pathMap){
 
             //Removing the player marker from the map and reducing the number of players that werent reached
             map[i][j] = ' ';
+			pathMap[i][j] = -2;
             num--;
         }
 
@@ -700,37 +845,38 @@ void BotMoves(){
         queue.pop();
         if(map[i][j] == 'B'){
             Move(i, j, pathMap);
+			continue;
         }
 
-        if(i - 1 >= 0 && map[i-1][j] != '#' && pathMap[i-1][j] == -1){
+        if(i - 1 >= 0 && map[i-1][j] != '#' && pathMap[i-1][j] == -1 && pathMap[i-1][j] != -2){
             queue.push(std::pair<int,int>{i-1, j});
             pathMap[i-1][j] = pathMap[i][j]+1;
         }
-        if(i + 1 < map.size() && map[i+1][j] != '#' && pathMap[i+1][j] == -1){
+        if(i + 1 < map.size() && map[i+1][j] != '#' && pathMap[i+1][j] == -1&& pathMap[i+1][j] != -2){
             queue.push(std::pair<int,int>{i+1, j});
             pathMap[i+1][j] = pathMap[i][j]+1;
         }
-        if(j - 1 >= 0 && map[i][j-1] != '#' && pathMap[i][j-1] == -1){
+        if(j - 1 >= 0 && map[i][j-1] != '#' && pathMap[i][j-1] == -1 && pathMap[i][j-1] != -2){
             queue.push(std::pair<int,int>{i, j-1});
             pathMap[i][j-1] = pathMap[i][j]+1;
         }
-        if(j + 1 < map.size() && map[i][j+1] != '#' && pathMap[i][j+1] == -1){
+        if(j + 1 < map.size() && map[i][j+1] != '#' && pathMap[i][j+1] == -1 && pathMap[i][j+1] != -2){
             queue.push(std::pair<int,int>{i, j+1});
             pathMap[i][j+1] = pathMap[i][j]+1;
         }
-        if(i - 1 >= 0 && j - 1 >= 0 && map[i-1][j-1] != '#' && pathMap[i-1][j-1] == -1){
+        if(i - 1 >= 0 && j - 1 >= 0 && map[i-1][j-1] != '#' && pathMap[i-1][j-1] == -1 && pathMap[i-1][j-1] != -2){
             queue.push(std::pair<int,int>{i-1, j-1});
             pathMap[i-1][j-1] = pathMap[i][j]+1;
         }
-        if(i - 1 >= 0 && j + 1 < map.size()  && map[i-1][j+1] != '#' && pathMap[i-1][j+1] == -1){
+        if(i - 1 >= 0 && j + 1 < map.size()  && map[i-1][j+1] != '#' && pathMap[i-1][j+1] == -1 && pathMap[i-1][j+1] != -2){
             queue.push(std::pair<int,int>{i-1, j+1});
             pathMap[i-1][j+1] = pathMap[i][j]+1;
         }
-        if(i + 1 < map.size() && j - 1 >= 0 && map[i+1][j-1] != '#' && pathMap[i+1][j-1] == -1){
+        if(i + 1 < map.size() && j - 1 >= 0 && map[i+1][j-1] != '#' && pathMap[i+1][j-1] == -1 && pathMap[i+1][j-1] != -2){
             queue.push(std::pair<int,int>{i+1, j-1});
             pathMap[i+1][j-1] = pathMap[i][j]+1;
         }
-        if(i + 1 < map.size() && j + 1 < map.size() && map[i+1][j+1] != '#' && pathMap[i+1][j+1] == -1){
+        if(i + 1 < map.size() && j + 1 < map.size() && map[i+1][j+1] != '#' && pathMap[i+1][j+1] == -1 && pathMap[i+1][j+1] != -2){
             queue.push(std::pair<int,int>{i+1, j+1});
             pathMap[i+1][j+1] = pathMap[i][j]+1;
         }
