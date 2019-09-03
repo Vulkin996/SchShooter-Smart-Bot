@@ -31,41 +31,6 @@ void GeneticAlgorithm::setIterations(int iter){
 	iterations = iter;
 }
 
-// Chromosome* GeneticAlgorithm::optimize(){
-//   while(!stop_condition()){
-//     std::cout << "Iteration: " << current_iteration << std::endl;
-//     for_reproduction = selection(chromosomes);
-//
-//     std::cout << "Top solution: ";
-//     for(int j = 0; j < target_size; j++){
-//         std::cout << top_chromosome->m_content[j]<< " ";
-//     }
-//     std::cout << "Fitness: "<< top_chromosome->m_fitness << std::endl;
-//     std::cout << std::endl;
-//
-//     temp_gen = create_generation(for_reproduction);
-//     for_reproduction.clear();
-//
-//
-//     for (std::vector<Chromosome*>::iterator ch = chromosomes.begin(); ch != chromosomes.end(); ++ch) {
-//         delete[] (*ch)->m_content;
-//         delete *ch;
-//     }
-//
-//     chromosomes.clear();
-//
-//     for(unsigned i = 0; i < generation_size; i++){
-//       chromosomes.push_back(temp_gen[i]);
-//     }
-//     temp_gen.clear();
-//
-//
-//     std::cout << std::endl;
-//     current_iteration += 1;
-//   }
-//
-//   return top_chromosome;
-// }
 
 
 
@@ -155,19 +120,6 @@ Chromosome* GeneticAlgorithm::selection_roulette_pick_one(std::vector<Chromosome
 
 
 
-// float GeneticAlgorithm::fitness(float* weights){
-//   float fit = std::accumulate(weights, weights+target_size, 0.0, [](float a, float b){return a + std::fabs(b);});
-//   float top = std::accumulate(top_chromosome->m_content, top_chromosome->m_content+target_size, 0.0, [](float a, float b){return a + std::fabs(b);});
-//   if(fit > top){
-//     for(int i = 0; i < target_size; i++){
-//         top_chromosome->m_content[i] = weights[i];
-//         top_chromosome->m_fitness = fit;
-//     }
-//   }
-//
-//   return fit;
-// }
-
 
 
 
@@ -204,21 +156,3 @@ Chromosome::Chromosome(Chromosome* ch, int size){
   }
   m_fitness = ch->m_fitness;
 }
-
-
-
-// int main(int argc, const char *argv[]){
-//     GeneticAlgorithm genetic = GeneticAlgorithm(15);
-//     Chromosome* solution = genetic.optimize();
-//
-//     std::cout << std::endl;
-//     std::cout <<"SOLUTION: "<< std::endl;
-//     for(int j = 0; j < genetic.target_size; j++){
-//         std::cout << solution->m_content[j]<< " ";
-//     }
-//     std::cout << std::endl;
-//     std::cout << "FITNESS: " << solution->m_fitness << std::endl;
-//     std::cout << std::endl;
-//
-//     return 0;
-// }

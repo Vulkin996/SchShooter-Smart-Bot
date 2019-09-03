@@ -17,9 +17,8 @@
 #include <map>
 #include <AL/alut.h>
 
-// //vector of temp population representation
-// std::vector<ANNPlayer*> networks;
-// //pointer to the current unit playing the game
+
+
 
 //Current network
 const std::string outputFile = "fann.txt";
@@ -31,13 +30,7 @@ ANNPlayer* currentPlayer;
 GeneticAlgorithm genetic;
 
 unsigned currentNetwork = 0;
-//function initializing population
-// void setupNetworks(){
-// 	for(int i = 0; i < 1; i++){
-// 		networks.push_back(new ANNPlayer());
-// 	}
-// 	currentNetwork = 0;
-// }
+
 
 std::vector<std::string> textureNames = {
 	std::string("sand"),
@@ -181,7 +174,6 @@ int currentPlayerGameNumber = 0;
 void HandleSimulationStep(){
 
 	if (GameOver || currentPlayer->timeAlive > 5000){
-		//BRANKOGEN FITNESS
 		//Kraj partije jedne mreze
 
 		currentPlayer->CalculateFitness();
@@ -206,18 +198,7 @@ void HandleSimulationStep(){
 			}
 			delete[] gen;
 		}
-		// if(currentPlayer->timeAlive > 5000){
-		// 	std::cout << std::endl << "Save FITNESS: "<< genetic.top_chromosome->m_fitness << std::endl;
-		// 	currentPlayer->SetChromosome(genetic.top_chromosome->m_content);
-		// 	currentPlayer->net.save(outputFileTest);
-		// 	exit(0);
-		// }
 
-		// if(currentPlayer->kills > 4){
-		// 	std::cout << "Network: " << currentNetwork << " finished with fitness: " << currentPlayer->m_fitness << " kills: " << currentPlayer->kills << " damage: " << currentPlayer->dmgDone<<" time: " << currentPlayer->timeAlive<<std::endl;
-		//
-		// 	exit(0);
-		// }
 
 		// if(trainingEnabled){
 		if(currentNetwork == genetic.generation_size-1){
@@ -239,10 +220,7 @@ void HandleSimulationStep(){
 			genetic.chromosomes.push_back(new Chromosome(genetic.top_chromosome, genetic.target_size));
 			genetic.temp_gen.clear();
 
-			// std::cout << "SOLUTION: " << std::endl;
-			// for(int j = 0; j < genetic.target_size; j++){
-			// 	std::cout << genetic.top_chromosome->m_content[j]<< " ";
-			// }
+
 			if(genetic.current_iteration == 150){
 			std::cout << std::endl << "Save FITNESS: "<< genetic.top_chromosome->m_fitness << std::endl;
 			for(int j = 0; j < genetic.target_size; j++){

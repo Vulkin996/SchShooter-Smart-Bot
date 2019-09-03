@@ -325,8 +325,6 @@ float* playerBrain::generateInput(){
 	}
 
 
-	// std::cout <<"PLAYER HP: "<< players[0]->GetHealth() << " PLAYER KILLS: " << currentPlayer->kills << std::endl;
-	// std::cout << players[0]->equiped_weapon->GetAmmo() << std::endl;
 	for(unsigned k=1;k<players.size();++k){
 		if (!players[k]->alive)
 			continue;
@@ -339,24 +337,11 @@ float* playerBrain::generateInput(){
 
 
 		}
-		// std::cout <<"BOT HP: "<< players[k]->GetHealth() << std::endl;
-		// std::cout <<"BOT LOS: "<< players[k]->see_player << std::endl;
-		// std::cout << players[k]->equiped_weapon->GetAmmo() <<  std::endl;;
 	}
 
 	in[up][left]= 'P';
 
 
-	// for(int i = 0; i < n; i++){
-	// 	for(int j = 0; j < m; j++){
-	// 		std::cout<<in[i][j];
-	// 	}
-	// 	std::cout <<std::endl;
-	// }
-	//
-	// std::cout << std::endl;
-	// std::cout << std::endl;
-	// usleep(microseconds);
 
 	//############### CALCULATING UP DOWN LEFT RIGHT AND DIAGONAL ########
 	// input[2] = FREE SPACE UP
@@ -460,18 +445,10 @@ void playerBrain::Update(){
 
 
 	float* output = currentPlayer->GetOutput(input);
-	//test always look at closest enemy:
-	//float angle = input[0];
+
 	delete[] input;
 
-	// for (int i=0; i<5; i++) {
-    //     std::cout << output[i] << " ";
-    // }
 
-	// std::cout << std::endl;
-	// std::cout << std::endl;
-
-	// std::cout << windowHeight << " " << windowWidth <<std::endl;
 	float vx,vy;
 	if(output[0] < 0.33){
 		vy = -1;
@@ -579,12 +556,7 @@ void botBrain::Update(){
 							}
 						}
 					}
-					// std::cout << "WAT" << std::endl;
-					//
-					// std::cout << "PLAYER: " << player_pos.x <<  " " << player_pos.y << std::endl;
-					// std::cout << "FIXTURE: " << bot_pos.x <<  " " << bot_pos.y << std::endl;
-					// std::cout << "GUN: " << Brain::m_player->equiped_weapon->getPosX() << " " << Brain::m_player->equiped_weapon->getPosY() << std::endl;
-					// std::cout << "BOT: " << Brain::m_player->body->GetPosition().x << " " << Brain::m_player->body->GetPosition().y << std::endl;
+
 				}
 
 
