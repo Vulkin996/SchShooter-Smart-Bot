@@ -63,7 +63,7 @@
 %\date{9.~april 2015.}
 \maketitle
 
-\abstract{ U radu će biti prikazana upotreba reinforcement learninga i genetskog algoritma za generisanje težina neuronske mreže koja igra top-down shooter igru “Shrodinger's shooter”. Ovaj pristup spada u Neuro-evoluciju\cite{neuroevolution}, s tim što se menjaju samo težine neruonske mreže dok je struktura fiksna. Za pisanje kodova je korišćen programski jezik C++ i biblioteka FANN sa omotačem za C++. Daćemo kratak opis igre kao i dva rešenja koja se razlikuju po načinu reprezentacije ulaza za neuronsku mrežu.
+\abstract{ U radu će biti prikazana upotreba “reinforcement learing”-a i genetskog algoritma za generisanje težina neuronske mreže koja igra top-down shooter igru “Shrodinger's shooter”. Ovaj pristup spada u Neuro-evoluciju\cite{neuroevolution}, s tim što se menjaju samo težine neruonske mreže dok je struktura fiksna. Za pisanje kodova je korišćen programski jezik C++ i biblioteka FANN sa omotačem za C++. Daćemo kratak opis igre kao i dva rešenja koja se razlikuju po načinu reprezentacije ulaza za neuronsku mrežu.
 } 
 \tableofcontents
 
@@ -99,7 +99,7 @@ koji vrši treniranje sa brojem iteracija “brojIteracija” bez grafičkog pri
 koji vrši treniranje sa brojem iteracija “brojIteracija”  sa grafičkim prikazom.
 
 \newpage
-\par Trening započinje kreiranjem početne generacije genetskog algoritma\cite{genetic} (slika \ref{fig:genetic}.\footnote{Slika preuzeta sa: \url{https://apacheignite.readme.io/docs/genetic-algorithms}}) kod koje svaki hromozom ima prilagođenost (fitness) jednak nuli. Hromozomi su predstavljeni sadržajem tj. nizom brojeva u pokretnom zarezu koji predstavlja težine svih veza mreže i jednim brojem u pokretnom zarezu koji predstavlja prilagođenost tog hromozoma. Težine se uzimaju nasumično iz intervala (-10, 10) koji je takođe nasumično izabran. Broj hromozoma u generaciji kao i broj generacija u oba rešenja iznose po nekoliko stotina. O ulazu će više biti rečeno u narednom poglavlju.
+\par Trening započinje kreiranjem početne generacije genetskog algoritma\cite{genetic} (slika \ref{fig:genetic}.\footnote{Slika preuzeta sa: \url{https://apacheignite.readme.io/docs/genetic-algorithms}}) kod koje svaki hromozom ima prilagođenost (fitness) jednak nuli. Hromozomi su predstavljeni sadržajem tj. nizom brojeva u pokretnom zarezu koji predstavlja težine svih veza mreže i jednim brojem u pokretnom zarezu koji predstavlja prilagođenost tog hromozoma. Težine se uzimaju nasumično iz intervala [-10, 10] koji je takođe nasumično izabran. Broj hromozoma u generaciji kao i broj generacija u oba rešenja iznose po nekoliko stotina. O ulazu će više biti rečeno u narednom poglavlju.
 
 \begin{figure}[h!]
 	\begin{center}
@@ -125,7 +125,7 @@ y = \frac{1}{1 + \mathrm{e}^{-2 \times s \times x}}
 d = 2 \times s \times y \times (1 - y)
 \end{equation}
 \end{tcolorbox}
-\noindent  Stopa učenja nije podešena pošto nema nikakvog uticaja na dati problem. Izlazni sloj sadrži pet neurona čiji izlazi imaju vrednosti u intervalu [0,1] a koji regulišu kretanje gore-dole, levo-desno, treći ugao pod kojim igrač nišani,da li da puca i da li da dopuni municiju. Prva dva izlaza su podeljena u tri intervala [0,0.33], (0.33-0.66] i (0.66-1] koji redom odgovaraju kretanju gore (levo), bez kretanja i dole (desno). Treći izlaz se skalira na [-$\pi$, $\pi$] i ugao igrača se postavlja na datu vrednost a četvrti i peti daju potvrdan odgovor za vrednosti manje od 0.5, a negativan u suprotnom. U svakoj iteraciji programa se ažuriraju pozicija i akcije igrača u zavisnosti od izlaza mreže. “Reinforcement learing” se koristi prilikom izračunavanja prilagođenosti svakog hromozoma tako što za svaku dobru akciju u vidu eliminacija ili nanošenja štete hromozom dobija nagradu u vidu poena. Prilagođenost se računa na osnovu naredne formule, a najbolje ocenjen hromozom se čuva.
+\noindent  Stopa učenja nije podešena pošto nema nikakvog uticaja na dati problem. Izlazni sloj sadrži pet neurona čiji izlazi imaju vrednosti u intervalu [0,1] a koji regulišu kretanje gore-dole, levo-desno, treći ugao pod kojim igrač nišani,da li da puca i da li da dopuni municiju. Prva dva izlaza su podeljena u tri intervala [0,0.33], (0.33-0.66] i (0.66-1] koji redom odgovaraju kretanju gore (levo), bez kretanja i dole (desno). Treći izlaz se skalira na [-$\pi$, $\pi$] i ugao igrača se postavlja na datu vrednost a četvrti i peti daju potvrdan odgovor za vrednosti manje od 0.5, a negativan u suprotnom. U svakoj iteraciji programa se ažuriraju pozicija i akcije igrača u zavisnosti od izlaza mreže. “Reinforcement learing” se koristi prilikom izračunavanja prilagođenosti svakog hromozoma tako što za svaku dobru akciju u vidu eliminacija ili nanošenja štete hromozom dobija nagradu u vidu poena. Prilagođenost se računa na osnovu naredne formule, a najbolje ocenjen hromozom se čuva. U drugom rešenju je dodatno implementirano višestruko izvršavanje za svaki hromozom, a zatim uzimanje srednje vrednosti dobijenih prilagođenosti.
 \begin{tcolorbox}
 fintess = eliminacije * 50 + šteta * 0.5
 \end{tcolorbox}
@@ -138,7 +138,7 @@ Ukrštanje u prvom rešenju: \\
 \end{center}
 i - nasumičan broj od 0 do veličine sadržaja hromozoma;\\
 dete1 = sadržaj roditelja1 do i + sadržaj roditelja2 od i do kraja; \\
-dete2 = sadržaj roditelja2 do i + sadržaj roditelja1 od  i do kraja; \\~ \\
+dete2 = sadržaj roditelja2 do i + sadržaj roditelja1 od  i do kraja; \\
 \begin{center}
 Mutacija u prvom rešenju:  \\
 \end{center}
@@ -158,7 +158,7 @@ Za svaki element i sadržaja hromozoma uraditi:\\
 \hphantom{tcolorbox}\hphantom{tcolorbox}dete2[i] = roditelj2[i]; \\
 \hphantom{tcolorbox}Inače: \\
 \hphantom{tcolorbox}\hphantom{tcolorbox}dete1[i] =  roditelj2[i]; \\
-\hphantom{tcolorbox}\hphantom{tcolorbox}dete2[i] =  roditelj1[i]; \\~\\
+\hphantom{tcolorbox}\hphantom{tcolorbox}dete2[i] =  roditelj1[i]; \\
 \begin{center}
 Mutacija u drugom rešenju:  \\
 \end{center}
@@ -203,14 +203,14 @@ GPU: AMD Radeon 6850 \\
 RAM: 4GB DDR3 \\
 OS: Ubuntu 16.04 \\
 \end{tcolorbox}
-\noindent Vreme trajanja je oko 8h posle čega je dobijena konfiguracija koja nije davala dobre rezultate. Zaključeno je da ovaj pristup suštinski ne konvergira ka dobrom rešenju te je primenjen drugi pristup sa drastično smanjenjim ulazom neuralne mreze.
+\noindent Vreme trajanja je oko 10h posle čega je dobijena konfiguracija koja nije davala dobre rezultate. Zaključeno je da ovaj pristup suštinski ne konvergira ka dobrom rešenju te je primenjen drugi pristup sa drastično smanjenjim ulazom neuralne mreze.
 
 \subsection {Drugo rešenje}
 \par U drugom rešenju znatno je smanjen broj ulaznih čvorova. Prvi ulaz je ugao prema najblizem vidljivom protivniku, a drugi trenutna kolicina municije. Okolina je predstavljena preko senzora. Postoji 8 senzora, po jedan u svakom pravcu od igrača (gore, dole, levo, desno i dijagonale).  Senzori proveravaju broj praznih mesta u svojim pravcima,  postavljaju se na određen broj i skaliraju na interval [0, 1] u odnosu na ukupan broj polja do kraja ekrana. 
 
-Ocekivano je da ce ovaj pristup dati smislenije rezultate zbog drastično manje kolicine ulaznih podataka, ali su dobijeni slični rezultati kao kod prvog rešenja.
+Ocekivano je da ce ovaj pristup dati smislenije rezultate zbog drastično manje kolicine ulaznih podataka. Uprkos smanjenom ulazu su dobijeni slični rezultati kao kod prvog rešenja, tj. igrači koji se nasumično kreću i pucaju.
 
-Trening za ovaj pristup vrsen je na populaciji od 400 jedinki po generaciji u 500 iteracija.
+Trening za ovaj pristup vršen je na populaciji od 100 jedinki po generaciji u 300 iteracija, s tim što se za svaku jedinku fitnes računao po pet puta pa je uzeta srednja vrednost.
 \newline
 \begin{tcolorbox}
 \begin {center}
@@ -227,11 +227,22 @@ OS: Windows Subsystem for Linux - Ubuntu 18.04 \\
 \section{Zaključak}
 \label{sec:zakljucak}
 
-\par Tema ovog rada bila je da se prikaže upotreba tehnika “reinforcement learing”-a,  neuronskih mreza i genetskog algoritma u svrhu igranja kompjuterskih igrica tj konkretno igrice “Shrodinger's shooter”. Postoji više nacina na koji moze da se realizuje “računarski igrač”,  predstavljeni pristup nije dao dobre rezultate. Podešavanjem parametara i načina predstavljanja unosnih podataka, kao i različitim dužinama treninga pokusano je da se sistem navede na bolja resenja ali idalje nije dobijeno zadovoljavajuće ponašanje. Analizom dobijenih rezultata zaključujemo da za dati problem nije dovoljno samo menjanje težine i da bi se, za ovaj konkretan problem, verovatnije dobili bolji rezultati primenom neke druge metode poput NEAT\cite{neat}  Algoritma gde se menja cela struktura neuronske mreze u procesu učenja.
+\par Tema ovog rada bila je da se prikaže upotreba tehnika “reinforcement learing”-a,  neuronskih mreza i genetskog algoritma u svrhu igranja kompjuterskih igrica tj konkretno igrice “Shrodinger's shooter”. Postoji više načina na koji moze da se realizuje “računarski igrač”,  predstavljeni pristup nije dao dobre rezultate. Podešavanjem parametara i načina predstavljanja unosnih podataka, kao i različitim dužinama treninga pokusano je da se sistem navede na bolja rešenja ali idalje nije dobijeno zadovoljavajuće ponašanje. Analizom dobijenih rezultata zaključujemo da za dati problem nije dovoljno samo menjanje težine i da bi se, za ovaj konkretan problem, verovatnije dobili bolji rezultati primenom neke druge metode poput NEAT\cite{neat}  Algoritma gde se menja cela struktura neuronske mreze u procesu učenja.
 
 
 \addcontentsline{toc}{section}{Literatura}
 \bibliography{seminarski} 
 \bibliographystyle{plain}
+
+\appendix
+\section{Uputstvo}
+\par Pre pokretanja bilo kog programa potrebno je instalirati neophodne pakete tako što se izvrše sledeće naredbe u terminalu:
+\begin{tcolorbox}
+sudo apt-get install freeglut3-dev\\
+sudo apt-get install libbox2d-dev\\
+sudo apt-get install libalut-dev \\
+sudo apt-get install libfann2\\
+sudo apt-get install libfann-dev
+\end{tcolorbox}
 
 \end{document}
